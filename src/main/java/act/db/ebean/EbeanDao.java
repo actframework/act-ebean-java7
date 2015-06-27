@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 public class EbeanDao<ID_TYPE, MODEL_TYPE, DAO_TYPE extends EbeanDao<ID_TYPE, MODEL_TYPE, DAO_TYPE>> extends DaoBase<ID_TYPE, MODEL_TYPE, EbeanQuery<MODEL_TYPE>, DAO_TYPE> {
 
@@ -63,6 +64,13 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE, DAO_TYPE extends EbeanDao<ID_TYPE, MO
     @Override
     public Iterable<MODEL_TYPE> findBy(String fields, Object... values) throws IllegalArgumentException {
         EbeanQuery<MODEL_TYPE> q = q(fields, values);
+        return q.fetch();
+    }
+
+    @Override
+    public Iterable<MODEL_TYPE> findByIdList(List<ID_TYPE> idList) {
+        EbeanQuery<MODEL_TYPE> q = q();
+        q.where().idIn(idList);
         return q.fetch();
     }
 

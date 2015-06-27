@@ -60,7 +60,7 @@ public class EbeanService extends DbService {
 
     @Override
     protected void releaseResources() {
-        ebean.shutdown(true, true);
+        ebean.shutdown(false, false);
     }
 
     @Override

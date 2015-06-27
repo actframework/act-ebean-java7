@@ -67,6 +67,12 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE, DAO_TYPE extends EbeanDao<ID_TYPE, MO
     }
 
     @Override
+    public MODEL_TYPE findOneBy(String fields, Object... values) throws IllegalArgumentException {
+        EbeanQuery<MODEL_TYPE> q = q(fields, values);
+        return q.first();
+    }
+
+    @Override
     public Iterable<MODEL_TYPE> findAll() {
         return q().fetch();
     }

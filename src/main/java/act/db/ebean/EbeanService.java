@@ -4,9 +4,7 @@ import act.Act;
 import act.app.App;
 import act.app.DbServiceManager;
 import act.app.event.AppEvent;
-import act.app.event.AppEventListener;
-import act.app.event.EventChannelListener;
-import act.app.event.EventChannelListenerBase;
+import act.app.event.AppEventHandlerBase;
 import act.db.Dao;
 import act.db.DbService;
 import com.avaje.ebean.Ebean;
@@ -14,10 +12,8 @@ import com.avaje.ebean.EbeanServer;
 import com.avaje.ebean.EbeanServerFactory;
 import com.avaje.ebean.config.DataSourceConfig;
 import com.avaje.ebean.config.ServerConfig;
-import org.avaje.agentloader.AgentLoader;
 import org.osgl._;
 import org.osgl.util.C;
-import org.osgl.util.E;
 import org.osgl.util.S;
 
 import java.util.Map;
@@ -41,13 +37,13 @@ public class EbeanService extends DbService {
         daoMap = new ConcurrentHashMap<Class<?>, Dao>();
         this.conf = config;
         final String agentPackage = conf.get("ebean.agentPackage").toString();
-        app.eventManager().listenTo(AppEvent.PRE_START, new EventChannelListenerBase(S.builder(dbId).append("-ebean-prestart")) {
+        app.eventManager().on(AppEvent.PRE_START, new AppEventHandlerBase(S.builder(dbId).append("-ebean-prestart")) {
             @Override
             public void onEvent() {
                 ebean = EbeanServerFactory.create(serverConfig(dbId, conf));
                 Ebean.register(ebean, S.eq(DbServiceManager.DEFAULT, dbId));
             }
-        }).listenTo(AppEvent.PRE_LOAD_CLASSES, new EventChannelListenerBase(S.builder(dbId).append("-ebean-pre-cl")) {
+        }).on(AppEvent.PRE_LOAD_CLASSES, new AppEventHandlerBase(S.builder(dbId).append("-ebean-pre-cl")) {
             @Override
             public void onEvent() {
                 String s = S.builder("debug=").append(Act.isDev() ? "1" : "0").append(";packages=").append(agentPackage).toString();

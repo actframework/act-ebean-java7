@@ -3,10 +3,11 @@ package act.db.ebean;
 import act.Act;
 import act.app.App;
 import act.app.DbServiceManager;
-import act.app.event.AppEvent;
-import act.app.event.AppEventHandlerBase;
+import act.app.event.AppPreLoadClasses;
+import act.app.event.AppPreStart;
 import act.db.Dao;
 import act.db.DbService;
+import act.event.AppEventListenerBase;
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.EbeanServer;
 import com.avaje.ebean.EbeanServerFactory;
@@ -20,6 +21,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import static act.app.event.AppEventId.PRE_LOAD_CLASSES;
+import static act.app.event.AppEventId.PRE_START;
 
 public class EbeanService extends DbService {
 
@@ -37,15 +41,15 @@ public class EbeanService extends DbService {
         daoMap = new ConcurrentHashMap<Class<?>, Dao>();
         this.conf = config;
         final String agentPackage = conf.get("ebean.agentPackage").toString();
-        app.eventManager().on(AppEvent.PRE_START, new AppEventHandlerBase(S.builder(dbId).append("-ebean-prestart")) {
+        app.eventBus().bind(PRE_START, new AppEventListenerBase<AppPreStart>(S.builder(dbId).append("-ebean-prestart")) {
             @Override
-            public void onEvent() {
+            public void on(AppPreStart event) {
                 ebean = EbeanServerFactory.create(serverConfig(dbId, conf));
                 Ebean.register(ebean, S.eq(DbServiceManager.DEFAULT, dbId));
             }
-        }).on(AppEvent.PRE_LOAD_CLASSES, new AppEventHandlerBase(S.builder(dbId).append("-ebean-pre-cl")) {
+        }).bind(PRE_LOAD_CLASSES, new AppEventListenerBase<AppPreLoadClasses>(S.builder(dbId).append("-ebean-pre-cl")) {
             @Override
-            public void onEvent() {
+            public void on(AppPreLoadClasses event) {
                 String s = S.builder("debug=").append(Act.isDev() ? "1" : "0").append(";packages=").append(agentPackage).toString();
                 if (!EbeanAgentLoader.loadAgentFromClasspath("avaje-ebeanorm-agent", s)) {
                     logger.warn("avaje-ebeanorm-agent not found in classpath - not dynamically loaded");
@@ -57,19 +61,6 @@ public class EbeanService extends DbService {
     @Override
     protected void releaseResources() {
         ebean.shutdown(false, false);
-    }
-
-    @Override
-    public <DAO extends Dao> DAO dao(Class<?> modelType) {
-        DAO dao = _.cast(daoMap.get(modelType));
-        if (null == dao) {
-            DAO dao1 = _.cast(new EbeanDao(modelType, ebean));
-            dao = _.cast(daoMap.putIfAbsent(modelType, dao1));
-            if (null == dao) {
-                dao = dao1;
-            }
-        }
-        return dao;
     }
 
     @Override

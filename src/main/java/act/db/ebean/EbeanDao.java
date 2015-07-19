@@ -2,7 +2,9 @@ package act.db.ebean;
 
 import act.app.App;
 import act.app.DbServiceManager;
-import act.db.*;
+import act.db.DB;
+import act.db.DaoBase;
+import act.db.DbService;
 import com.avaje.ebean.EbeanServer;
 import com.avaje.ebean.ExpressionList;
 import org.osgl._;
@@ -120,11 +122,6 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE, DAO_TYPE extends EbeanDao<ID_TYPE, MO
     @Override
     public EbeanQuery<MODEL_TYPE> q() {
         return new EbeanQuery<MODEL_TYPE>(ebean(), modelType);
-    }
-
-    @Override
-    public DAO_TYPE on(String dbId) {
-        return getService(dbId, app.dbServiceManager()).dao(modelType);
     }
 
     public Class modelType() {

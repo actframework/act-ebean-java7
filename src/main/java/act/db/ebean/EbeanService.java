@@ -65,7 +65,7 @@ public class EbeanService extends DbService {
 
     @Override
     protected <DAO extends Dao> DAO defaultDao(Class<?> modelType) {
-        return _.cast(new EbeanDao(modelType, ebean));
+        return _.cast(new EbeanDao(modelType, this));
     }
 
     public EbeanServer ebean() {

@@ -14,10 +14,13 @@ import java.util.Set;
 public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODEL_TYPE, EbeanQuery<MODEL_TYPE>> {
 
     Query<MODEL_TYPE> q;
+    EbeanDao dao;
 
-    public EbeanQuery(EbeanServer ebean, Class<MODEL_TYPE> modelType) {
+    public EbeanQuery(EbeanDao dao, Class<MODEL_TYPE> modelType) {
+        EbeanServer ebean = dao.ebean();
         E.NPE(ebean);
         q = ebean.createQuery(modelType);
+        this.dao = dao;
     }
 
     @Override
@@ -49,7 +52,7 @@ public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODE
         return new Iterable<MODEL_TYPE>() {
             @Override
             public Iterator<MODEL_TYPE> iterator() {
-                return q.findIterate();
+                return findIterate();
             }
         };
     }
@@ -154,7 +157,9 @@ public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODE
 
     @Override
     public QueryIterator<MODEL_TYPE> findIterate() {
-        return q.findIterate();
+        QueryIterator<MODEL_TYPE> i = q.findIterate();
+        dao.registerQueryIterator(i);
+        return i;
     }
 
     @Override

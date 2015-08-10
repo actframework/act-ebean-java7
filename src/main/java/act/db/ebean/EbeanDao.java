@@ -1,38 +1,82 @@
 package act.db.ebean;
 
+import act.app.ActionContext;
+import act.app.ActionContext.SessionResolvedEvent;
+import act.app.ActionContext.SessionWillDissolveEvent;
 import act.app.App;
 import act.app.DbServiceManager;
 import act.db.DB;
 import act.db.DaoBase;
 import act.db.DbService;
+import act.event.ActEventListener;
+import act.event.ActEventListenerBase;
+import act.event.EventBus;
 import com.avaje.ebean.EbeanServer;
 import com.avaje.ebean.ExpressionList;
+import com.avaje.ebean.QueryIterator;
 import org.osgl._;
+import org.osgl.logging.L;
+import org.osgl.logging.Logger;
 import org.osgl.util.C;
 import org.osgl.util.E;
 
 import javax.inject.Inject;
 import java.lang.reflect.Array;
 import java.util.Collection;
+import java.util.EventObject;
 import java.util.Iterator;
 import java.util.List;
 
 public class EbeanDao<ID_TYPE, MODEL_TYPE, DAO_TYPE extends EbeanDao<ID_TYPE, MODEL_TYPE, DAO_TYPE>> extends DaoBase<ID_TYPE, MODEL_TYPE, EbeanQuery<MODEL_TYPE>, DAO_TYPE> {
 
+    private static final Logger logger = L.get(EbeanDao.class);
+
     private Class<MODEL_TYPE> modelType;
     private volatile EbeanServer ebean;
+    private List<QueryIterator> queryIterators = C.newList();
 
-    @Inject
     private App app;
 
-    EbeanDao(Class<MODEL_TYPE> modelType, EbeanServer ebean) {
-        E.NPE(modelType, ebean);
+    EbeanDao(Class<MODEL_TYPE> modelType, EbeanService service) {
+        E.NPE(modelType, service.ebean());
         this.modelType = modelType;
-        this.ebean = ebean;
+        this.ebean = service.ebean();
+        registerSessionDissolveEventHandler(service.app().eventBus());
     }
 
     protected EbeanDao(Class<MODEL_TYPE> modelType) {
         this.modelType = modelType;
+    }
+
+    @Inject
+    public void setApp(App app) {
+        this.app = app;
+        registerSessionDissolveEventHandler(app.eventBus());
+    }
+
+    private void registerSessionDissolveEventHandler(EventBus eventBus) {
+        final EbeanDao me = this;
+        eventBus.bind(SessionWillDissolveEvent.class, new ActEventListenerBase<SessionWillDissolveEvent>() {
+            @Override
+            public void on(SessionWillDissolveEvent event) throws Exception {
+                me.destroy();
+            }
+        });
+    }
+
+    @Override
+    protected void releaseResources() {
+        if (null != queryIterators) {
+            for (QueryIterator i : queryIterators) {
+                try {
+                    i.close();
+                } catch (Exception e) {
+                    logger.warn(e, "error closing query iterators");
+                }
+            }
+            queryIterators.clear();
+            queryIterators = null;
+        }
     }
 
     private EbeanService getService(String dbId, DbServiceManager mgr) {
@@ -56,6 +100,10 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE, DAO_TYPE extends EbeanDao<ID_TYPE, MO
             }
         }
         return ebean;
+    }
+
+    void registerQueryIterator(QueryIterator i) {
+        queryIterators.add(i);
     }
 
     @Override
@@ -121,7 +169,7 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE, DAO_TYPE extends EbeanDao<ID_TYPE, MO
 
     @Override
     public EbeanQuery<MODEL_TYPE> q() {
-        return new EbeanQuery<MODEL_TYPE>(ebean(), modelType);
+        return new EbeanQuery<MODEL_TYPE>(this, modelType);
     }
 
     public Class modelType() {

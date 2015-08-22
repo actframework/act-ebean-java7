@@ -15,6 +15,7 @@ import com.avaje.ebean.config.DataSourceConfig;
 import com.avaje.ebean.config.ServerConfig;
 import org.osgl._;
 import org.osgl.util.C;
+import org.osgl.util.E;
 import org.osgl.util.S;
 
 import java.util.Map;
@@ -40,7 +41,11 @@ public class EbeanService extends DbService {
         super(dbId, app);
         daoMap = new ConcurrentHashMap<Class<?>, Dao>();
         this.conf = config;
-        final String agentPackage = conf.get("ebean.agentPackage").toString();
+        Object o = conf.get("ebean.agentPackage");
+        if (null == o) {
+            E.invalidConfiguration("Cannot find 'ebean.agentPackage' configuration");
+        }
+        final String agentPackage = o.toString();
         app.eventBus().bind(PRE_START, new AppEventListenerBase<AppPreStart>(S.builder(dbId).append("-ebean-prestart")) {
             @Override
             public void on(AppPreStart event) {

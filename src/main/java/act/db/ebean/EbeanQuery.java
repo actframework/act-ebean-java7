@@ -3,6 +3,8 @@ package act.db.ebean;
 import act.db.Dao;
 import com.avaje.ebean.*;
 import com.avaje.ebean.text.PathProperties;
+import org.osgl._;
+import org.osgl.util.C;
 import org.osgl.util.E;
 import org.osgl.util.S;
 
@@ -160,6 +162,18 @@ public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODE
         QueryIterator<MODEL_TYPE> i = q.findIterate();
         dao.registerQueryIterator(i);
         return i;
+    }
+
+    public void consume(_.Visitor<MODEL_TYPE> visitor) {
+        QueryIterator<MODEL_TYPE> i = q.findIterate();
+        try {
+            while (i.hasNext()) {
+                MODEL_TYPE entity = i.next();
+                visitor.visit(entity);
+            }
+        } finally {
+            i.close();
+        }
     }
 
     @Override

@@ -35,9 +35,11 @@ public class EbeanService extends DbService {
 
     private Map<String, Object> conf;
 
+    private ServerConfig serverConfig;
+
     private static Set<Class<?>> modelTypes = C.newSet();
 
-    public EbeanService(final String dbId, final App app, Map<String, Object> config) {
+    public EbeanService(final String dbId, final App app, final Map<String, Object> config) {
         super(dbId, app);
         daoMap = new ConcurrentHashMap<Class<?>, Dao>();
         this.conf = config;
@@ -46,10 +48,12 @@ public class EbeanService extends DbService {
             E.invalidConfiguration("Cannot find 'ebean.agentPackage' configuration");
         }
         final String agentPackage = o.toString();
+        final EbeanService svc = this;
         app.eventBus().bind(PRE_START, new AppEventListenerBase<AppPreStart>(S.builder(dbId).append("-ebean-prestart")) {
             @Override
             public void on(AppPreStart event) {
-                ebean = EbeanServerFactory.create(serverConfig(dbId, conf));
+                svc.serverConfig = serverConfig(dbId, conf);
+                ebean = EbeanServerFactory.create(serverConfig);
                 Ebean.register(ebean, S.eq(DbServiceManager.DEFAULT, dbId));
             }
         }).bind(PRE_LOAD_CLASSES, new AppEventListenerBase<AppPreLoadClasses>(S.builder(dbId).append("-ebean-pre-cl")) {

@@ -10,6 +10,9 @@ import act.mail.MailerContext;
 import com.avaje.ebean.EbeanServer;
 import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.QueryIterator;
+import com.avaje.ebean.SqlUpdate;
+import com.avaje.ebean.config.TableName;
+import com.avaje.ebeaninternal.api.SpiEbeanServer;
 import org.osgl._;
 import org.osgl.logging.L;
 import org.osgl.logging.Logger;
@@ -29,6 +32,7 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE, DAO_TYPE extends EbeanDao<ID_TYPE, MO
 
     private Class<MODEL_TYPE> modelType;
     private volatile EbeanServer ebean;
+    private String tableName;
     private List<QueryIterator> queryIterators = C.newList();
 
     private App app;
@@ -37,6 +41,7 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE, DAO_TYPE extends EbeanDao<ID_TYPE, MO
         E.NPE(modelType, service.ebean());
         this.modelType = modelType;
         this.ebean = service.ebean();
+        this.tableName = ((SpiEbeanServer) ebean).getBeanDescriptor(modelType).getBaseTable();
     }
 
     protected EbeanDao(Class<MODEL_TYPE> modelType) {
@@ -161,6 +166,13 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE, DAO_TYPE extends EbeanDao<ID_TYPE, MO
     @Override
     public void delete(MODEL_TYPE entity) {
         ebean().delete(entity);
+    }
+
+    @Override
+    public void drop() {
+        String sql = "DELETE from " + tableName;
+        SqlUpdate sqlUpdate = ebean().createSqlUpdate(sql);
+        ebean().execute(sqlUpdate);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package act.db.ebean;
 
 import act.Act;
+import act.ActComponent;
 import act.app.App;
 import act.app.DbServiceManager;
 import act.app.event.AppPreLoadClasses;
@@ -26,6 +27,7 @@ import java.util.concurrent.ConcurrentMap;
 import static act.app.event.AppEventId.PRE_LOAD_CLASSES;
 import static act.app.event.AppEventId.PRE_START;
 
+@ActComponent
 public class EbeanService extends DbService {
 
     // the ebean service instance

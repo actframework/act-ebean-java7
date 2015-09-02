@@ -1,11 +1,10 @@
 package act.db.ebean;
 
+import act.ActComponent;
 import act.app.ActionContext;
 import act.app.App;
 import act.app.DbServiceManager;
-import act.db.DB;
-import act.db.DaoBase;
-import act.db.DbService;
+import act.db.*;
 import act.mail.MailerContext;
 import com.avaje.ebean.EbeanServer;
 import com.avaje.ebean.ExpressionList;
@@ -21,11 +20,14 @@ import org.osgl.util.E;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import javax.persistence.Id;
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+@ActComponent
 public class EbeanDao<ID_TYPE, MODEL_TYPE, DAO_TYPE extends EbeanDao<ID_TYPE, MODEL_TYPE, DAO_TYPE>> extends DaoBase<ID_TYPE, MODEL_TYPE, EbeanQuery<MODEL_TYPE>, DAO_TYPE> {
 
     private static final Logger logger = L.get(EbeanDao.class);
@@ -33,6 +35,7 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE, DAO_TYPE extends EbeanDao<ID_TYPE, MO
     private Class<MODEL_TYPE> modelType;
     private volatile EbeanServer ebean;
     private String tableName;
+    private Field idField = null;
     private List<QueryIterator> queryIterators = C.newList();
 
     private App app;
@@ -40,6 +43,14 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE, DAO_TYPE extends EbeanDao<ID_TYPE, MO
     EbeanDao(Class<MODEL_TYPE> modelType, EbeanService service) {
         E.NPE(modelType, service.ebean());
         this.modelType = modelType;
+        for (Field f: modelType.getDeclaredFields()) {
+            Id idAnno = f.getAnnotation(Id.class);
+            if (null != idAnno) {
+                idField = f;
+                f.setAccessible(true);
+                break;
+            }
+        }
         this.ebean = service.ebean();
         this.tableName = ((SpiEbeanServer) ebean).getBeanDescriptor(modelType).getBaseTable();
     }
@@ -114,9 +125,9 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE, DAO_TYPE extends EbeanDao<ID_TYPE, MO
     }
 
     @Override
-    public Iterable<MODEL_TYPE> findByIdList(List<ID_TYPE> idList) {
+    public Iterable<MODEL_TYPE> findByIdList(Collection<ID_TYPE> idList) {
         EbeanQuery<MODEL_TYPE> q = q();
-        q.where().idIn(idList);
+        q.where().idIn(C.list(idList));
         return q.fetch();
     }
 
@@ -137,9 +148,24 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE, DAO_TYPE extends EbeanDao<ID_TYPE, MO
     }
 
     @Override
-    public MODEL_TYPE reload(MODEL_TYPE model) {
-        ebean().refresh(model);
-        return model;
+    public MODEL_TYPE reload(MODEL_TYPE entity) {
+        ebean().refresh(entity);
+        return entity;
+    }
+
+    @Override
+    public ID_TYPE getId(MODEL_TYPE entity) {
+        if (entity instanceof Model) {
+            return (ID_TYPE) ((Model) entity)._id();
+        } else if (null != idField) {
+            try {
+                return (ID_TYPE) idField.get(entity);
+            } catch (IllegalAccessException e) {
+                throw E.unexpected(e);
+            }
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -166,6 +192,16 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE, DAO_TYPE extends EbeanDao<ID_TYPE, MO
     @Override
     public void delete(MODEL_TYPE entity) {
         ebean().delete(entity);
+    }
+
+    @Override
+    public void delete(EbeanQuery<MODEL_TYPE> query) {
+        throw E.unsupport();
+    }
+
+    @Override
+    public void deleteById(ID_TYPE id) {
+        ebean().delete(modelType(), id);
     }
 
     @Override

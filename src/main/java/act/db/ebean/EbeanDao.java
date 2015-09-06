@@ -196,7 +196,7 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE, DAO_TYPE extends EbeanDao<ID_TYPE, MO
 
     @Override
     public void delete(EbeanQuery<MODEL_TYPE> query) {
-        throw E.unsupport();
+        ebean().delete(query);
     }
 
     @Override

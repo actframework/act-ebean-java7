@@ -8,6 +8,7 @@ import org.osgl.util.C;
 import org.osgl.util.E;
 import org.osgl.util.S;
 
+import java.sql.Timestamp;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,41 @@ public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODE
         E.NPE(ebean);
         q = ebean.createQuery(modelType);
         this.dao = dao;
+    }
+
+    @Override
+    public Query<MODEL_TYPE> asOf(Timestamp timestamp) {
+        return q.asOf(timestamp);
+    }
+
+    @Override
+    public List<Version<MODEL_TYPE>> findVersions() {
+        return q.findVersions();
+    }
+
+    @Override
+    public List<Version<MODEL_TYPE>> findVersionsBetween(Timestamp timestamp, Timestamp timestamp1) {
+        return q.findVersionsBetween(timestamp, timestamp1);
+    }
+
+    @Override
+    public int delete() {
+        return q.delete();
+    }
+
+    @Override
+    public Object getId() {
+        return q.getId();
+    }
+
+    @Override
+    public Class<MODEL_TYPE> getBeanType() {
+        return q.getBeanType();
+    }
+
+    @Override
+    public Query<MODEL_TYPE> setDisableLazyLoading(boolean b) {
+        return q.setDisableLazyLoading(b);
     }
 
     @Override
@@ -174,12 +210,6 @@ public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODE
         } finally {
             i.close();
         }
-    }
-
-    @Override
-    @Deprecated
-    public void findVisit(QueryResultVisitor<MODEL_TYPE> visitor) {
-        q.findVisit(visitor);
     }
 
     @Override

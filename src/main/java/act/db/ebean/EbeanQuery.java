@@ -102,6 +102,17 @@ public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODE
 
     // --- Ebean Query methods: delegate to q
 
+
+    @Override
+    public boolean isAutofetchTuned() {
+        return q.isAutofetchTuned();
+    }
+
+    @Override
+    public Query<MODEL_TYPE> setAutofetch(boolean b) {
+        return q.setAutofetch(b);
+    }
+
     @Override
     public RawSql getRawSql() {
         return q.getRawSql();
@@ -133,17 +144,6 @@ public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODE
     @Override
     public ExpressionFactory getExpressionFactory() {
         return q.getExpressionFactory();
-    }
-
-    @Override
-    public boolean isAutofetchTuned() {
-        return q.isAutofetchTuned();
-    }
-
-    @Override
-    public EbeanQuery<MODEL_TYPE> setAutofetch(boolean autofetch) {
-        q.setAutofetch(autofetch);
-        return this;
     }
 
     @Override

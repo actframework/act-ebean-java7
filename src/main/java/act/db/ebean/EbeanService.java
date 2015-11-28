@@ -14,7 +14,7 @@ import com.avaje.ebean.EbeanServer;
 import com.avaje.ebean.EbeanServerFactory;
 import com.avaje.ebean.config.DataSourceConfig;
 import com.avaje.ebean.config.ServerConfig;
-import org.osgl._;
+import org.osgl.$;
 import org.osgl.util.C;
 import org.osgl.util.E;
 import org.osgl.util.S;
@@ -78,7 +78,7 @@ public class EbeanService extends DbService {
 
     @Override
     protected <DAO extends Dao> DAO defaultDao(Class<?> modelType) {
-        return _.cast(new EbeanDao(modelType, this));
+        return $.cast(new EbeanDao(modelType, this));
     }
 
     public EbeanServer ebean() {

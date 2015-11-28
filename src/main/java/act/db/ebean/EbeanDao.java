@@ -5,14 +5,12 @@ import act.app.ActionContext;
 import act.app.App;
 import act.app.DbServiceManager;
 import act.db.*;
-import act.mail.MailerContext;
 import com.avaje.ebean.EbeanServer;
 import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.QueryIterator;
 import com.avaje.ebean.SqlUpdate;
-import com.avaje.ebean.config.TableName;
 import com.avaje.ebeaninternal.api.SpiEbeanServer;
-import org.osgl._;
+import org.osgl.$;
 import org.osgl.logging.L;
 import org.osgl.logging.Logger;
 import org.osgl.util.C;
@@ -90,7 +88,7 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE, DAO_TYPE extends EbeanDao<ID_TYPE, MO
         DbService svc = mgr.dbService(dbId);
         E.invalidConfigurationIf(null == svc, "Cannot find db service by id: %s", dbId);
         E.invalidConfigurationIf(!(svc instanceof EbeanService), "The db service[%s|%s] is not ebean service", dbId, svc.getClass());
-        return _.cast(svc);
+        return $.cast(svc);
     }
 
     protected EbeanServer ebean() {
@@ -265,8 +263,8 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE, DAO_TYPE extends EbeanDao<ID_TYPE, MO
         }, between() {
             @Override
             void applyTo(ExpressionList<?> where, String field, Object val) {
-                if (val instanceof _.T2) {
-                    _.T2 t2 = _.cast(val);
+                if (val instanceof $.T2) {
+                    $.T2 t2 = $.cast(val);
                     where.between(field, t2._1, t2._2);
                 } else if (val.getClass().isArray()) {
                     int len = Array.getLength(val);

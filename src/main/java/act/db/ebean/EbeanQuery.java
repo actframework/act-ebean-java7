@@ -3,8 +3,7 @@ package act.db.ebean;
 import act.db.Dao;
 import com.avaje.ebean.*;
 import com.avaje.ebean.text.PathProperties;
-import org.osgl._;
-import org.osgl.util.C;
+import org.osgl.$;
 import org.osgl.util.E;
 import org.osgl.util.S;
 
@@ -102,6 +101,27 @@ public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODE
 
     // --- Ebean Query methods: delegate to q
 
+
+    @Override
+    public Query<MODEL_TYPE> asDraft() {
+        return q.asDraft();
+    }
+
+    @Override
+    public boolean isAutoTuned() {
+        return q.isAutoTuned();
+    }
+
+    @Override
+    public Query<MODEL_TYPE> setAutoTune(boolean b) {
+        return q.setAutoTune(b);
+    }
+
+    @Override
+    public Query<MODEL_TYPE> setDisableReadAuditing() {
+        return q.setDisableReadAuditing();
+    }
+
     @Override
     public RawSql getRawSql() {
         return q.getRawSql();
@@ -133,17 +153,6 @@ public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODE
     @Override
     public ExpressionFactory getExpressionFactory() {
         return q.getExpressionFactory();
-    }
-
-    @Override
-    public boolean isAutofetchTuned() {
-        return q.isAutofetchTuned();
-    }
-
-    @Override
-    public EbeanQuery<MODEL_TYPE> setAutofetch(boolean autofetch) {
-        q.setAutofetch(autofetch);
-        return this;
     }
 
     @Override
@@ -200,7 +209,7 @@ public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODE
         return i;
     }
 
-    public void consume(_.Visitor<MODEL_TYPE> visitor) {
+    public void consume($.Visitor<MODEL_TYPE> visitor) {
         QueryIterator<MODEL_TYPE> i = q.findIterate();
         try {
             while (i.hasNext()) {

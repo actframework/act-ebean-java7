@@ -463,4 +463,19 @@ public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODE
         q.alias(alias);
         return this;
     }
+
+    @Override
+    public Query<MODEL_TYPE> includeSoftDeletes() {
+        return q.includeSoftDeletes();
+    }
+
+    @Override
+    public PagedList<MODEL_TYPE> findPagedList() {
+        return q.findPagedList();
+    }
+
+    @Override
+    public Set<String> validate() {
+        return q.validate();
+    }
 }

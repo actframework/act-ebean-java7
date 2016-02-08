@@ -55,6 +55,7 @@ public class EbeanService extends DbService {
             @Override
             public void on(AppPreStart event) {
                 svc.serverConfig = serverConfig(dbId, conf);
+                app().eventBus().emit(new PreEbeanCreation(serverConfig));
                 ebean = EbeanServerFactory.create(serverConfig);
                 Ebean.register(ebean, S.eq(DbServiceManager.DEFAULT, dbId));
             }

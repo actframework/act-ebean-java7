@@ -19,6 +19,8 @@ import org.osgl.util.C;
 import org.osgl.util.E;
 import org.osgl.util.S;
 
+import javax.persistence.Entity;
+import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -62,7 +64,11 @@ public class EbeanService extends DbService {
         }).bind(PRE_LOAD_CLASSES, new AppEventListenerBase<AppPreLoadClasses>(S.builder(dbId).append("-ebean-pre-cl")) {
             @Override
             public void on(AppPreLoadClasses event) {
-                String s = S.builder("debug=").append(Act.isDev() ? "1" : "0").append(";packages=").append(agentPackage).toString();
+                String s = S.builder("debug=").append(Act.isDev() ? "1" : "0")
+                        .append(";packages=")
+                        //.append("act.db.ebean.*,")
+                        .append(agentPackage)
+                        .toString();
                 if (!EbeanAgentLoader.loadAgentFromClasspath("avaje-ebeanorm-agent", s)) {
                     logger.warn("avaje-ebeanorm-agent not found in classpath - not dynamically loaded");
                 }
@@ -78,8 +84,18 @@ public class EbeanService extends DbService {
     }
 
     @Override
-    protected <DAO extends Dao> DAO defaultDao(Class<?> modelType) {
+    public <DAO extends Dao> DAO defaultDao(Class<?> modelType) {
         return $.cast(new EbeanDao(modelType, this));
+    }
+
+    @Override
+    public <DAO extends Dao> DAO newDaoInstance(Class<DAO> daoType) {
+        return null;
+    }
+
+    @Override
+    public Class<? extends Annotation> entityAnnotationType() {
+        return Entity.class;
     }
 
     public EbeanServer ebean() {

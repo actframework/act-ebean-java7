@@ -4,7 +4,11 @@ import act.ActComponent;
 import act.app.ActionContext;
 import act.app.App;
 import act.app.DbServiceManager;
-import act.db.*;
+import act.db.DB;
+import act.db.DaoBase;
+import act.db.DbService;
+import act.db.Model;
+import act.util.General;
 import com.avaje.ebean.EbeanServer;
 import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.QueryIterator;
@@ -25,8 +29,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+@General
 @ActComponent
-public class EbeanDao<ID_TYPE, MODEL_TYPE, DAO_TYPE extends EbeanDao<ID_TYPE, MODEL_TYPE, DAO_TYPE>> extends DaoBase<ID_TYPE, MODEL_TYPE, EbeanQuery<MODEL_TYPE>, DAO_TYPE> {
+public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, EbeanQuery<MODEL_TYPE>> {
 
     private static final Logger logger = L.get(EbeanDao.class);
 

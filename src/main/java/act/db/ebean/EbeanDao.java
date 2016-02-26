@@ -58,6 +58,9 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
         this.tableName = ((SpiEbeanServer) ebean).getBeanDescriptor(modelType).getBaseTable();
     }
 
+    EbeanDao() {
+    }
+
     protected EbeanDao(Class<MODEL_TYPE> modelType) {
         this.modelType = modelType;
     }
@@ -65,6 +68,14 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
     @Inject
     public void setApp(App app) {
         this.app = app;
+    }
+
+    public void ebean(EbeanServer ebean) {
+        this.ebean = $.notNull(ebean);
+    }
+
+    public void modelType(Class<?> type) {
+        this.modelType = $.cast(type);
     }
 
     @Inject

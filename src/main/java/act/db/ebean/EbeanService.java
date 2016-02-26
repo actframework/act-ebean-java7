@@ -90,7 +90,10 @@ public class EbeanService extends DbService {
 
     @Override
     public <DAO extends Dao> DAO newDaoInstance(Class<DAO> daoType) {
-        return null;
+        E.illegalArgumentIf(!EbeanDao.class.isAssignableFrom(daoType), "expected EbeanDao, found: %s", daoType);
+        EbeanDao dao = $.cast(app().newInstance(daoType));
+        dao.ebean(this.ebean());
+        return (DAO) dao;
     }
 
     @Override

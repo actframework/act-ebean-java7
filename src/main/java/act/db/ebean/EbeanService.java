@@ -6,6 +6,7 @@ import act.app.App;
 import act.app.DbServiceManager;
 import act.app.event.AppPreLoadClasses;
 import act.app.event.AppPreStart;
+import act.conf.AppConfigKey;
 import act.db.Dao;
 import act.db.DbService;
 import act.event.AppEventListenerBase;
@@ -47,11 +48,10 @@ public class EbeanService extends DbService {
         super(dbId, app);
         daoMap = new ConcurrentHashMap<Class<?>, Dao>();
         this.conf = config;
-        Object o = conf.get("ebean.agentPackage");
-        if (null == o) {
-            E.invalidConfiguration("Cannot find 'ebean.agentPackage' configuration");
-        }
-        final String agentPackage = o.toString();
+        Object o = conf.get("agentPackage");
+        final String agentPackage = null == o ? S.string(app().config().get(AppConfigKey.SCAN_PACKAGE)) : S.string(o).trim();
+        E.invalidConfigurationIf(S.blank(agentPackage), "\"agentPackage\" not configured");
+        logger.info("\"agentPackage\" configured: %s", agentPackage);
         final EbeanService svc = this;
         app.eventBus().bind(PRE_START, new AppEventListenerBase<AppPreStart>(S.builder(dbId).append("-ebean-prestart")) {
             @Override
@@ -126,6 +126,13 @@ public class EbeanService extends DbService {
             sc.setDdlRun(true);
         }
 
+        String ddlCreateOnly = (String) conf.get("ddl.createOnly");
+        if (null != ddlCreateOnly) {
+            sc.setDdlCreateOnly(Boolean.parseBoolean(ddlCreateOnly));
+        } else {
+            sc.setDdlCreateOnly(false);
+        }
+
         for (Class<?> c : modelTypes) {
             sc.addClass(c);
         }
@@ -149,14 +156,14 @@ public class EbeanService extends DbService {
         }
         dsc.setPassword(password);
 
-        String driver = (String) conf.get("databaseDriver");
+        String driver = (String) conf.get("driver");
         if (null == driver) {
             logger.warn("No database driver configuration specified. Will use the default h2 driver!");
             driver = "org.h2.Driver";
         }
         dsc.setDriver(driver);
 
-        String url = (String) conf.get("databaseUrl");
+        String url = (String) conf.get("url");
         if (null == url) {
             logger.warn("No database URL configuration specified. Will use the default h2 inmemory test database");
             url = "jdbc:h2:mem:tests";

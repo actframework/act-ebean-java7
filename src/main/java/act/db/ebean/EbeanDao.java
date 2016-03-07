@@ -422,7 +422,8 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
         }
     }
 
-    private EbeanQuery<MODEL_TYPE> q(String keys, Object... values) {
+    @Override
+    public EbeanQuery<MODEL_TYPE> q(String keys, Object... values) {
         int len = values.length;
         E.illegalArgumentIf(len == 0, "no values supplied");
         String[] sa = keys.split("[,;:]+");

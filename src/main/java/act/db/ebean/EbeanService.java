@@ -4,11 +4,11 @@ import act.Act;
 import act.ActComponent;
 import act.app.App;
 import act.app.DbServiceManager;
-import act.app.event.AppPreLoadClasses;
-import act.app.event.AppPreStart;
+import act.app.event.*;
 import act.conf.AppConfigKey;
 import act.db.Dao;
 import act.db.DbService;
+import act.event.ActEvent;
 import act.event.AppEventListenerBase;
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.EbeanServer;
@@ -22,13 +22,13 @@ import org.osgl.util.S;
 
 import javax.persistence.Entity;
 import java.lang.annotation.Annotation;
+import java.util.EventObject;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import static act.app.event.AppEventId.PRE_LOAD_CLASSES;
-import static act.app.event.AppEventId.PRE_START;
+import static act.app.event.AppEventId.*;
 
 @ActComponent
 public class EbeanService extends DbService {
@@ -53,17 +53,17 @@ public class EbeanService extends DbService {
         E.invalidConfigurationIf(S.blank(agentPackage), "\"agentPackage\" not configured");
         logger.info("\"agentPackage\" configured: %s", agentPackage);
         final EbeanService svc = this;
-        app.eventBus().bind(PRE_START, new AppEventListenerBase<AppPreStart>(S.builder(dbId).append("-ebean-prestart")) {
+        app.eventBus().bind(CLASS_LOADED, new AppEventListenerBase(S.builder(dbId).append("-ebean-prestart")) {
             @Override
-            public void on(AppPreStart event) {
+            public void on(EventObject event) {
                 svc.serverConfig = serverConfig(dbId, conf);
                 app().eventBus().emit(new PreEbeanCreation(serverConfig));
                 ebean = EbeanServerFactory.create(serverConfig);
                 Ebean.register(ebean, S.eq(DbServiceManager.DEFAULT, dbId));
             }
-        }).bind(PRE_LOAD_CLASSES, new AppEventListenerBase<AppPreLoadClasses>(S.builder(dbId).append("-ebean-pre-cl")) {
+        }).bind(PRE_LOAD_CLASSES, new AppEventListenerBase(S.builder(dbId).append("-ebean-pre-cl")) {
             @Override
-            public void on(AppPreLoadClasses event) {
+            public void on(EventObject event) {
                 String s = S.builder("debug=").append(Act.isDev() ? "1" : "0")
                         .append(";packages=")
                         //.append("act.db.ebean.*,")

@@ -106,19 +106,19 @@
     <dependency>
       <groupId>org.avaje.ebeanorm</groupId>
       <artifactId>avaje-ebeanorm</artifactId>
-      <version>[6.11.1,7)</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.avaje</groupId>
-      <artifactId>avaje-agentloader</artifactId>
-      <version>1.1.1</version>
+      <version>[7.2.2,)</version>
     </dependency>
 
     <dependency>
       <groupId>org.avaje.ebeanorm</groupId>
       <artifactId>avaje-ebeanorm-agent</artifactId>
-      <version>4.1.2</version>
+      <version>4.9.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.avaje</groupId>
+      <artifactId>avaje-agentloader</artifactId>
+      <version>2.1.2</version>
     </dependency>
 
     <dependency>

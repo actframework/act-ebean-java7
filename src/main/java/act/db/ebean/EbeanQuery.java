@@ -4,6 +4,7 @@ import act.db.Dao;
 import com.avaje.ebean.*;
 import com.avaje.ebean.text.PathProperties;
 import org.osgl.$;
+import org.osgl.util.C;
 import org.osgl.util.E;
 import org.osgl.util.S;
 
@@ -38,6 +39,22 @@ public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODE
     @Override
     public List<Version<MODEL_TYPE>> findVersionsBetween(Timestamp timestamp, Timestamp timestamp1) {
         return q.findVersionsBetween(timestamp, timestamp1);
+    }
+
+    @Override
+    public Query<MODEL_TYPE> apply(FetchPath fetchPath) {
+        return q.apply(fetchPath);
+    }
+
+    @Override
+    public ExpressionList<MODEL_TYPE> text() {
+        return q.text();
+    }
+
+    @Override
+    public Query<MODEL_TYPE> setUseDocStore(boolean b) {
+        q.setUseDocStore(b);
+        return this;
     }
 
     @Override
@@ -86,12 +103,20 @@ public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODE
 
     @Override
     public Iterable<MODEL_TYPE> fetch() {
-        return new Iterable<MODEL_TYPE>() {
-            @Override
-            public Iterator<MODEL_TYPE> iterator() {
-                return findIterate();
-            }
-        };
+        C.List<MODEL_TYPE> list = C.newList();
+        QueryIterator<MODEL_TYPE> qi = findIterate();
+        while (qi.hasNext()) {
+            list.add(qi.next());
+        }
+        qi.close();
+        return list;
+// we need to close the query iterable right now otherwise it hold the data connection forever
+//        return new Iterable<MODEL_TYPE>() {
+//            @Override
+//            public Iterator<MODEL_TYPE> iterator() {
+//                return findIterate();
+//            }
+//        };
     }
 
     @Override
@@ -188,12 +213,6 @@ public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODE
     @Override
     public EbeanQuery<MODEL_TYPE> fetch(String path, FetchConfig joinConfig) {
         q.fetch(path, joinConfig);
-        return this;
-    }
-
-    @Override
-    public EbeanQuery<MODEL_TYPE> apply(PathProperties pathProperties) {
-        q.apply(pathProperties);
         return this;
     }
 

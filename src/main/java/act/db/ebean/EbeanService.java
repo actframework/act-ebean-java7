@@ -79,7 +79,7 @@ public class EbeanService extends DbService {
     @Override
     protected void releaseResources() {
         if (null != ebean) {
-            ebean.shutdown(false, false);
+            ebean.shutdown(true, false);
         }
     }
 
@@ -201,5 +201,9 @@ public class EbeanService extends DbService {
 
     public static void registerModelType(Class<?> modelType) {
         modelTypes.add(modelType);
+        Class<?> superType = modelType.getSuperclass();
+        if (!Object.class.equals(superType)) {
+            registerModelType(superType);
+        }
     }
 }

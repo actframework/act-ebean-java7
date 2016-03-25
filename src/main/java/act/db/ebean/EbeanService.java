@@ -145,7 +145,37 @@ public class EbeanService extends DbService {
         properties.putAll(conf);
         DataSourceConfig dsc = new DataSourceConfig();
         dsc.loadSettings(properties, "");
+        ensureDefaultDatasourceConfig(dsc);
         return dsc;
+    }
+
+    private void ensureDefaultDatasourceConfig(DataSourceConfig dsc) {
+        String username = dsc.getUsername();
+        if (null == username) {
+            logger.warn("No data source user configuration specified. Will use the default 'sa' user");
+            username = "sa";
+        }
+        dsc.setUsername(username);
+
+        String password = dsc.getPassword();
+        if (null == password) {
+            password = "";
+        }
+        dsc.setPassword(password);
+
+        String driver = dsc.getDriver();
+        if (null == driver) {
+            logger.warn("No database driver configuration specified. Will use the default h2 driver!");
+            driver = "org.h2.Driver";
+        }
+        dsc.setDriver(driver);
+
+        String url = dsc.getUrl();
+        if (null == url) {
+            logger.warn("No database URL configuration specified. Will use the default h2 inmemory test database");
+            url = "jdbc:h2:mem:tests";
+        }
+        dsc.setUrl(url);
     }
 
     public static void registerModelType(Class<?> modelType) {

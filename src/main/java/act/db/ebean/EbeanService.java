@@ -4,17 +4,15 @@ import act.Act;
 import act.ActComponent;
 import act.app.App;
 import act.app.DbServiceManager;
-import act.app.event.*;
 import act.conf.AppConfigKey;
 import act.db.Dao;
 import act.db.DbService;
-import act.event.ActEvent;
 import act.event.AppEventListenerBase;
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.EbeanServer;
 import com.avaje.ebean.EbeanServerFactory;
-import com.avaje.ebean.config.DataSourceConfig;
 import com.avaje.ebean.config.ServerConfig;
+import org.avaje.datasource.DataSourceConfig;
 import org.osgl.$;
 import org.osgl.util.C;
 import org.osgl.util.E;
@@ -24,11 +22,13 @@ import javax.persistence.Entity;
 import java.lang.annotation.Annotation;
 import java.util.EventObject;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import static act.app.event.AppEventId.*;
+import static act.app.event.AppEventId.CLASS_LOADED;
+import static act.app.event.AppEventId.PRE_LOAD_CLASSES;
 
 @ActComponent
 public class EbeanService extends DbService {
@@ -141,62 +141,11 @@ public class EbeanService extends DbService {
     }
 
     private DataSourceConfig datasourceConfig(Map<String, Object> conf) {
+        Properties properties = new Properties();
+        properties.putAll(conf);
         DataSourceConfig dsc = new DataSourceConfig();
-
-        String username = (String) conf.get("username");
-        if (null == username) {
-            logger.warn("No data source user configuration specified. Will use the default 'sa' user");
-            username = "sa";
-        }
-        dsc.setUsername(username);
-
-        String password = (String) conf.get("password");
-        if (null == password) {
-            password = "";
-        }
-        dsc.setPassword(password);
-
-        String driver = (String) conf.get("driver");
-        if (null == driver) {
-            logger.warn("No database driver configuration specified. Will use the default h2 driver!");
-            driver = "org.h2.Driver";
-        }
-        dsc.setDriver(driver);
-
-        String url = (String) conf.get("url");
-        if (null == url) {
-            logger.warn("No database URL configuration specified. Will use the default h2 inmemory test database");
-            url = "jdbc:h2:mem:tests";
-        }
-        dsc.setUrl(url);
-
-        String heartbeatsql = (String) conf.get("heartbeatsql");
-        if (null != heartbeatsql) {
-            dsc.setHeartbeatSql(heartbeatsql);
-        }
-
-        String isolationlevel = (String) conf.get("isolationlevel");
-        if (null != isolationlevel) {
-            dsc.setIsolationLevel(dsc.getTransactionIsolationLevel(isolationlevel));
-        }
-
-        if (conf.containsKey("minConnections")) {
-            int minConn = Integer.parseInt((String) conf.get("minConnections"));
-            dsc.setMinConnections(minConn);
-        }
-
-        if (conf.containsKey("maxConnections")) {
-            int maxConn = Integer.parseInt((String) conf.get("maxConnections"));
-            dsc.setMaxConnections(maxConn);
-        }
-
-        if (conf.containsKey("capturestacktrace")) {
-            boolean b = Boolean.parseBoolean((String) conf.get("capturestacktrace"));
-            dsc.setCaptureStackTrace(b);
-        }
-
+        dsc.loadSettings(properties, "");
         return dsc;
-
     }
 
     public static void registerModelType(Class<?> modelType) {

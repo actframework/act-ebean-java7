@@ -1,26 +1,32 @@
 package act.db.ebean;
 
 import act.app.App;
-import act.db.Dao;
 import act.db.DbService;
-import act.di.guice.DaoInjectionListenerBase;
+import act.db.di.DaoInjectionListenerBase;
 import org.osgl.$;
+
+import java.lang.reflect.Type;
 
 public class EbeanDaoInjectionListener extends DaoInjectionListenerBase {
 
     @Override
-    public Class<? extends Dao> targetDaoType() {
-        return EbeanDao.class;
+    public Class[] listenTo() {
+        return new Class[]{EbeanDao.class};
     }
 
     @Override
-    public void afterInjection(Dao dao) {
-        DbService dbService = App.instance().dbServiceManager().dbService(svcId());
+    public void onInjection(Object injectee, Type[] typeParameters) {
+        if (null == typeParameters) {
+            logger.warn("No type parameter information provided");
+            return;
+        }
+        $.T2<Class, String> resolved = resolve(typeParameters);
+        DbService dbService = App.instance().dbServiceManager().dbService(resolved._2);
         if (dbService instanceof EbeanService) {
-            EbeanDao ebeanDao = $.cast(dao);
-            EbeanService ebeanService = $.cast(dbService);
-            ebeanDao.ebean(ebeanService.ebean());
-            ebeanDao.modelType(modelType());
+            EbeanService service = $.cast(dbService);
+            EbeanDao dao = $.cast(injectee);
+            dao.ebean(service.ebean());
+            dao.modelType(resolved._1);
         }
     }
 }

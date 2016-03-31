@@ -128,6 +128,12 @@ public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODE
 
 
     @Override
+    public Query<MODEL_TYPE> setIncludeSoftDeletes() {
+        q.setIncludeSoftDeletes();
+        return this;
+    }
+
+    @Override
     public Query<MODEL_TYPE> asDraft() {
         return q.asDraft();
     }

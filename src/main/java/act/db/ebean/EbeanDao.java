@@ -201,6 +201,11 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
     }
 
     @Override
+    public void save(Iterable<MODEL_TYPE> iterable) {
+        ebean().saveAll(C.list(iterable));
+    }
+
+    @Override
     public void save(MODEL_TYPE entity, String fields, Object... values) throws IllegalArgumentException {
         ebean.update(entity);
     }
@@ -218,6 +223,12 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
     @Override
     public void deleteById(ID_TYPE id) {
         ebean().delete(modelType(), id);
+    }
+
+    @Override
+    public void deleteBy(String fields, Object... values) throws IllegalArgumentException {
+        EbeanQuery<MODEL_TYPE> q = q(fields, values);
+        ebean().delete(q);
     }
 
     @Override

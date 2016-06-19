@@ -14,6 +14,8 @@ import com.avaje.ebean.EbeanServerFactory;
 import com.avaje.ebean.config.ServerConfig;
 import org.avaje.datasource.DataSourceConfig;
 import org.osgl.$;
+import org.osgl.logging.LogManager;
+import org.osgl.logging.Logger;
 import org.osgl.util.C;
 import org.osgl.util.E;
 import org.osgl.util.S;
@@ -31,7 +33,9 @@ import static act.app.event.AppEventId.CLASS_LOADED;
 import static act.app.event.AppEventId.PRE_LOAD_CLASSES;
 
 @ActComponent
-public class EbeanService extends DbService {
+public final class EbeanService extends DbService {
+
+    private static Logger logger = LogManager.get(EbeanService.class);
 
     // the ebean service instance
     private EbeanServer ebean;

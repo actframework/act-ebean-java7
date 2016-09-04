@@ -21,7 +21,10 @@ import org.osgl.util.E;
 import org.osgl.util.S;
 
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.EventObject;
 import java.util.Map;
 import java.util.Properties;
@@ -88,14 +91,23 @@ public final class EbeanService extends DbService {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <DAO extends Dao> DAO defaultDao(Class<?> modelType) {
-        return $.cast(new EbeanDao(modelType, this));
+        if (EbeanModelBase.class.isAssignableFrom(modelType)) {
+            Type type = modelType.getGenericSuperclass();
+            if (type instanceof ParameterizedType) {
+                return $.cast(new EbeanDao((Class)((ParameterizedType) type).getActualTypeArguments()[0], modelType, this));
+            }
+        }
+        Class<?> idType = findModelIdTypeByAnnotation(modelType, Id.class);
+        E.illegalArgumentIf(null == idType, "Cannot find out Dao for model type[%s]: unable to identify the ID type", modelType);
+        return $.cast(new EbeanDao(idType, modelType, this));
     }
 
     @Override
     public <DAO extends Dao> DAO newDaoInstance(Class<DAO> daoType) {
         E.illegalArgumentIf(!EbeanDao.class.isAssignableFrom(daoType), "expected EbeanDao, found: %s", daoType);
-        EbeanDao dao = $.cast(app().newInstance(daoType));
+        EbeanDao dao = $.cast(app().getInstance(daoType));
         dao.ebean(this.ebean());
         return (DAO) dao;
     }

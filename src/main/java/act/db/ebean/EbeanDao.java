@@ -1,6 +1,5 @@
 package act.db.ebean;
 
-import act.ActComponent;
 import act.app.ActionContext;
 import act.app.App;
 import act.app.DbServiceManager;
@@ -30,12 +29,10 @@ import java.util.Iterator;
 import java.util.List;
 
 @General
-@ActComponent
 public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, EbeanQuery<MODEL_TYPE>> {
 
     private static final Logger logger = L.get(EbeanDao.class);
 
-    private Class<MODEL_TYPE> modelType;
     private volatile EbeanServer ebean;
     private String tableName;
     private Field idField = null;
@@ -43,9 +40,10 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
 
     private App app;
 
-    EbeanDao(Class<MODEL_TYPE> modelType, EbeanService service) {
+    @Inject
+    EbeanDao(Class<ID_TYPE> idType, Class<MODEL_TYPE> modelType, EbeanService service) {
+        super(idType, modelType);
         E.NPE(modelType, service.ebean());
-        this.modelType = modelType;
         for (Field f: modelType.getDeclaredFields()) {
             Id idAnno = f.getAnnotation(Id.class);
             if (null != idAnno) {
@@ -59,17 +57,10 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
         this.app = service.app();
     }
 
-    EbeanDao() {
-    }
-
-    protected EbeanDao(Class<MODEL_TYPE> modelType) {
-        this.modelType = modelType;
-        this.app = App.instance();
-    }
-
     @Inject
-    public void setApp(App app) {
-        this.app = app;
+    protected EbeanDao(Class<ID_TYPE> id_type, Class<MODEL_TYPE> modelType) {
+        super(id_type, modelType);
+        this.app = App.instance();
     }
 
     public void ebean(EbeanServer ebean) {
@@ -78,13 +69,6 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
 
     public void modelType(Class<?> type) {
         this.modelType = $.cast(type);
-    }
-
-    @Inject
-    public void setActionContext(@Nullable ActionContext actionContext) {
-        if (null != actionContext) {
-            actionContext.addDestroyable(this);
-        }
     }
 
     @Override

@@ -58,6 +58,11 @@ public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODE
     }
 
     @Override
+    public int update() {
+        return q.update();
+    }
+
+    @Override
     public int delete() {
         return q.delete();
     }
@@ -102,6 +107,26 @@ public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODE
     }
 
     @Override
+    public Query<MODEL_TYPE> fetchQuery(String path, String fetchProperties) {
+        return q.fetchQuery(path, fetchProperties);
+    }
+
+    @Override
+    public Query<MODEL_TYPE> fetchLazy(String path, String fetchProperties) {
+        return q.fetchLazy(path, fetchProperties);
+    }
+
+    @Override
+    public Query<MODEL_TYPE> fetchQuery(String path) {
+        return fetchQuery(path);
+    }
+
+    @Override
+    public Query<MODEL_TYPE> fetchLazy(String path) {
+        return fetchLazy(path);
+    }
+
+    @Override
     public Iterable<MODEL_TYPE> fetch() {
         C.List<MODEL_TYPE> list = C.newList();
         QueryIterator<MODEL_TYPE> qi = findIterate();
@@ -121,7 +146,7 @@ public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODE
 
     @Override
     public long count() {
-        return q.findRowCount();
+        return q.findCount();
     }
 
     // --- Ebean Query methods: delegate to q
@@ -267,13 +292,13 @@ public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODE
     }
 
     @Override
-    public Map<?, MODEL_TYPE> findMap() {
+    public <K> Map<K, MODEL_TYPE> findMap() {
         return q.findMap();
     }
 
     @Override
-    public <K> Map<K, MODEL_TYPE> findMap(String keyProperty, Class<K> keyType) {
-        return q.findMap(keyProperty, keyType);
+    public <A> List<A> findSingleAttributeList() {
+        return q.findSingleAttributeList();
     }
 
     @Override
@@ -282,8 +307,23 @@ public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODE
     }
 
     @Override
+    public int findCount() {
+        return q.findCount();
+    }
+
+    /**
+     * Deprecated for {@link #findCount()}
+     * @return the count of the records this query should return
+     */
+    @Deprecated
+    @Override
     public int findRowCount() {
         return q.findRowCount();
+    }
+
+    @Override
+    public FutureRowCount<MODEL_TYPE> findFutureCount() {
+        return q.findFutureCount();
     }
 
     @Override
@@ -302,11 +342,6 @@ public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODE
     }
 
     @Override
-    public PagedList<MODEL_TYPE> findPagedList(int pageIndex, int pageSize) {
-        return q.findPagedList(pageIndex, pageSize);
-    }
-
-    @Override
     public EbeanQuery<MODEL_TYPE> setParameter(String name, Object value) {
         q.setParameter(name, value);
         return this;
@@ -321,12 +356,6 @@ public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODE
     @Override
     public EbeanQuery<MODEL_TYPE> setId(Object id) {
         q.setId(id);
-        return this;
-    }
-
-    @Override
-    public EbeanQuery<MODEL_TYPE> where(String addToWhereClause) {
-        q.where(addToWhereClause);
         return this;
     }
 
@@ -349,12 +378,6 @@ public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODE
     @Override
     public ExpressionList<MODEL_TYPE> having() {
         return q.having();
-    }
-
-    @Override
-    public EbeanQuery<MODEL_TYPE> having(String addToHavingClause) {
-        q.having(addToHavingClause);
-        return this;
     }
 
     @Override
@@ -487,11 +510,6 @@ public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODE
     public EbeanQuery<MODEL_TYPE> alias(String alias) {
         q.alias(alias);
         return this;
-    }
-
-    @Override
-    public Query<MODEL_TYPE> includeSoftDeletes() {
-        return q.includeSoftDeletes();
     }
 
     @Override

@@ -19,6 +19,7 @@
 *            version history
 ********************************************
 0.2.0 - upgrade to act 0.2.0
+      - upgrade to ebean-8
 0.1.2 - upgrade to act 0.1.2
 0.1.1 - baseline version
 -->
@@ -112,15 +113,15 @@
     </dependency>
 
     <dependency>
-      <groupId>org.avaje.ebeanorm</groupId>
-      <artifactId>avaje-ebeanorm</artifactId>
-      <version>7.4.1</version>
+      <groupId>org.avaje.ebean</groupId>
+      <artifactId>ebean</artifactId>
+      <version>8.2.3</version>
     </dependency>
 
     <dependency>
-      <groupId>org.avaje.ebeanorm</groupId>
-      <artifactId>avaje-ebeanorm-agent</artifactId>
-      <version>4.9.2</version>
+      <groupId>org.avaje.ebean</groupId>
+      <artifactId>ebean-agent</artifactId>
+      <version>8.1.1</version>
     </dependency>
 
     <dependency>

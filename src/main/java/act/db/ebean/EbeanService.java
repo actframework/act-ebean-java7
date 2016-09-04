@@ -76,8 +76,8 @@ public final class EbeanService extends DbService {
                         //.append("act.db.ebean.*,")
                         .append(agentPackage)
                         .toString();
-                if (!EbeanAgentLoader.loadAgentFromClasspath("avaje-ebeanorm-agent", s)) {
-                    logger.warn("avaje-ebeanorm-agent not found in classpath - not dynamically loaded");
+                if (!EbeanAgentLoader.loadAgentFromClasspath("ebean-agent", s)) {
+                    logger.warn("ebean-agent not found in classpath - not dynamically loaded");
                 }
             }
         });

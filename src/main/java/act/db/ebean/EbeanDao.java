@@ -1,6 +1,5 @@
 package act.db.ebean;
 
-import act.app.ActionContext;
 import act.app.App;
 import act.app.DbServiceManager;
 import act.db.DB;
@@ -19,7 +18,6 @@ import org.osgl.logging.Logger;
 import org.osgl.util.C;
 import org.osgl.util.E;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.persistence.Id;
 import java.lang.reflect.Array;
@@ -40,7 +38,21 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
 
     private App app;
 
-    @Inject
+    EbeanDao(EbeanService service) {
+        for (Field f: modelType.getDeclaredFields()) {
+            Id idAnno = f.getAnnotation(Id.class);
+            if (null != idAnno) {
+                idField = f;
+                f.setAccessible(true);
+                break;
+            }
+        }
+        this.ebean = service.ebean();
+        this.tableName = ((SpiEbeanServer) ebean).getBeanDescriptor(modelType).getBaseTable();
+        this.app = service.app();
+    }
+
+    @Deprecated
     EbeanDao(Class<ID_TYPE> idType, Class<MODEL_TYPE> modelType, EbeanService service) {
         super(idType, modelType);
         E.NPE(modelType, service.ebean());

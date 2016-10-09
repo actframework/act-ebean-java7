@@ -6,6 +6,7 @@ import com.avaje.ebean.text.PathProperties;
 import org.osgl.$;
 import org.osgl.util.C;
 import org.osgl.util.E;
+import org.osgl.util.Generics;
 import org.osgl.util.S;
 
 import java.sql.Timestamp;
@@ -16,10 +17,24 @@ import java.util.Set;
 
 public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODEL_TYPE, EbeanQuery<MODEL_TYPE>> {
 
+    protected Class<MODEL_TYPE> modelType;
+
     Query<MODEL_TYPE> q;
     EbeanDao dao;
 
+    public EbeanQuery() {
+        List<Class> typeParams = Generics.typeParamImplementations(getClass(), EbeanQuery.class);
+        int sz = typeParams.size();
+        if (sz > 1) {
+            dao = $.cast(typeParams.get(1));
+        }
+        if (sz > 0) {
+            modelType = $.cast(typeParams.get(0));
+        }
+    }
+
     public EbeanQuery(EbeanDao dao, Class<MODEL_TYPE> modelType) {
+        this.modelType = modelType;
         EbeanServer ebean = dao.ebean();
         E.NPE(ebean);
         q = ebean.createQuery(modelType);

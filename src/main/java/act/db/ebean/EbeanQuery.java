@@ -9,6 +9,7 @@ import org.osgl.util.E;
 import org.osgl.util.Generics;
 import org.osgl.util.S;
 
+import java.lang.reflect.Type;
 import java.sql.Timestamp;
 import java.util.Iterator;
 import java.util.List;
@@ -23,7 +24,7 @@ public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODE
     EbeanDao dao;
 
     public EbeanQuery() {
-        List<Class> typeParams = Generics.typeParamImplementations(getClass(), EbeanQuery.class);
+        List<Type> typeParams = Generics.typeParamImplementations(getClass(), EbeanQuery.class);
         int sz = typeParams.size();
         if (sz > 1) {
             dao = $.cast(typeParams.get(1));

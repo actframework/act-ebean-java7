@@ -39,7 +39,7 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
     private App app;
 
     EbeanDao(EbeanService service) {
-        for (Field f: modelType.getDeclaredFields()) {
+        for (Field f: ((Class<?>)modelType).getDeclaredFields()) {
             Id idAnno = f.getAnnotation(Id.class);
             if (null != idAnno) {
                 idField = f;
@@ -48,7 +48,7 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
             }
         }
         this.ebean = service.ebean();
-        this.tableName = ((SpiEbeanServer) ebean).getBeanDescriptor(modelType).getBaseTable();
+        this.tableName = ((SpiEbeanServer) ebean).getBeanDescriptor((Class<?>)modelType).getBaseTable();
         this.app = service.app();
     }
 
@@ -111,7 +111,7 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
         }
         synchronized (this) {
             if (null == ebean) {
-                DB db = modelType.getAnnotation(DB.class);
+                DB db = ((Class<?>)modelType).getAnnotation(DB.class);
                 String dbId = null == db ? DbServiceManager.DEFAULT : db.value();
                 EbeanService dbService = getService(dbId, app.dbServiceManager());
                 E.NPE(dbService);
@@ -127,7 +127,7 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
 
     @Override
     public MODEL_TYPE findById(ID_TYPE id) {
-        return ebean().find(modelType, id);
+        return (MODEL_TYPE) ebean().find((Class<?>)modelType, id);
     }
 
     @Override
@@ -236,11 +236,11 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
 
     @Override
     public EbeanQuery<MODEL_TYPE> q() {
-        return new EbeanQuery<MODEL_TYPE>(this, modelType);
+        return new EbeanQuery<MODEL_TYPE>(this, (Class)modelType);
     }
 
     public Class modelType() {
-        return modelType;
+        return (Class)modelType;
     }
 
     private enum R2 {

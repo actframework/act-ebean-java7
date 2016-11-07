@@ -2,15 +2,14 @@ package act.db.ebean;
 
 import act.db.Dao;
 import com.avaje.ebean.*;
-import com.avaje.ebean.text.PathProperties;
 import org.osgl.$;
 import org.osgl.util.C;
 import org.osgl.util.E;
 import org.osgl.util.Generics;
 import org.osgl.util.S;
 
+import java.lang.reflect.Type;
 import java.sql.Timestamp;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,7 +22,7 @@ public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODE
     EbeanDao dao;
 
     public EbeanQuery() {
-        List<Class> typeParams = Generics.typeParamImplementations(getClass(), EbeanQuery.class);
+        List<Type> typeParams = Generics.typeParamImplementations(getClass(), EbeanQuery.class);
         int sz = typeParams.size();
         if (sz > 1) {
             dao = $.cast(typeParams.get(1));
@@ -326,24 +325,9 @@ public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODE
         return q.findCount();
     }
 
-    /**
-     * Deprecated for {@link #findCount()}
-     * @return the count of the records this query should return
-     */
-    @Deprecated
-    @Override
-    public int findRowCount() {
-        return q.findRowCount();
-    }
-
     @Override
     public FutureRowCount<MODEL_TYPE> findFutureCount() {
         return q.findFutureCount();
-    }
-
-    @Override
-    public FutureRowCount<MODEL_TYPE> findFutureRowCount() {
-        return q.findFutureRowCount();
     }
 
     @Override

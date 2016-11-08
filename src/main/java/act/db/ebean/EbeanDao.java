@@ -54,7 +54,6 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
         this.app = service.app();
     }
 
-    @Deprecated
     EbeanDao(Class<ID_TYPE> idType, Class<MODEL_TYPE> modelType, EbeanService service) {
         super(idType, modelType);
         this.ebean = $.notNull(service.ebean());

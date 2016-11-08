@@ -22,6 +22,7 @@ import org.osgl.util.S;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.PersistenceException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -65,7 +66,18 @@ public final class EbeanService extends DbService {
             public void on(EventObject event) {
                 svc.serverConfig = serverConfig(dbId, conf);
                 app().eventBus().emit(new PreEbeanCreation(serverConfig));
-                ebean = EbeanServerFactory.create(serverConfig);
+                try {
+                    ebean = EbeanServerFactory.create(serverConfig);
+                } catch (PersistenceException e) {
+                    // try disable ddlRun
+                    // see http://stackoverflow.com/questions/35676651/ebean-run-ddl-only-if-the-database-does-not-exist/36253846
+                    if (Act.isDev()) {
+                        serverConfig.setDdlRun(false);
+                        ebean = EbeanServerFactory.create(serverConfig);
+                    } else {
+                        throw e;
+                    }
+                }
                 Ebean.register(ebean, S.eq(DbServiceManager.DEFAULT, dbId));
             }
         }).bind(PRE_LOAD_CLASSES, new AppEventListenerBase(S.builder(dbId).append("-ebean-pre-cl")) {

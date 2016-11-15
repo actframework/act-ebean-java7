@@ -74,6 +74,7 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
     protected EbeanDao(Class<ID_TYPE> id_type, Class<MODEL_TYPE> modelType) {
         super(id_type, modelType);
         this.app = App.instance();
+        this.modelClass = modelType;
     }
 
     public void ebean(EbeanServer ebean) {

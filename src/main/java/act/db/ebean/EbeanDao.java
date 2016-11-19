@@ -17,6 +17,7 @@ import org.osgl.logging.L;
 import org.osgl.logging.Logger;
 import org.osgl.util.C;
 import org.osgl.util.E;
+import org.osgl.util.S;
 
 import javax.inject.Inject;
 import javax.persistence.Id;
@@ -341,12 +342,20 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
         }, like() {
             @Override
             void applyTo(ExpressionList<?> where, String field, Object val) {
-                where.like(field, val.toString());
+                String s = S.string(val);
+                if (!s.contains("%")) {
+                    s = S.builder("%").append(s).append("%").toString();
+                }
+                where.like(field, s);
             }
         }, ilike() {
             @Override
             void applyTo(ExpressionList<?> where, String field, Object val) {
-                where.ilike(field, val.toString());
+                String s = S.string(val);
+                if (!s.contains("%")) {
+                    s = S.builder("%").append(s).append("%").toString();
+                }
+                where.ilike(field, s);
             }
         }, startsWith() {
             @Override

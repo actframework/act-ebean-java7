@@ -30,8 +30,6 @@ import java.util.EventObject;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import static act.app.event.AppEventId.CLASS_LOADED;
 import static act.app.event.AppEventId.PRE_LOAD_CLASSES;
@@ -44,8 +42,6 @@ public final class EbeanService extends DbService {
     // the ebean service instance
     private EbeanServer ebean;
 
-    private ConcurrentMap<Class<?>, Dao> daoMap;
-
     private Map<String, Object> conf;
 
     private ServerConfig serverConfig;
@@ -54,7 +50,6 @@ public final class EbeanService extends DbService {
 
     public EbeanService(final String dbId, final App app, final Map<String, Object> config) {
         super(dbId, app);
-        daoMap = new ConcurrentHashMap<Class<?>, Dao>();
         this.conf = config;
         Object o = conf.get("agentPackage");
         final String agentPackage = null == o ? S.string(app().config().get(AppConfigKey.SCAN_PACKAGE)) : S.string(o).trim();
@@ -100,6 +95,8 @@ public final class EbeanService extends DbService {
         if (null != ebean) {
             ebean.shutdown(true, false);
         }
+        modelTypes.clear();
+        conf.clear();
     }
 
     @Override
@@ -133,7 +130,6 @@ public final class EbeanService extends DbService {
         return ebean;
     }
 
-
     private ServerConfig serverConfig(String id, Map<String, Object> conf) {
         ServerConfig sc = new ServerConfig();
         sc.setName(id);
@@ -158,7 +154,7 @@ public final class EbeanService extends DbService {
         if (null != ddlCreateOnly) {
             sc.setDdlCreateOnly(Boolean.parseBoolean(ddlCreateOnly));
         } else {
-            sc.setDdlCreateOnly(false);
+            sc.setDdlCreateOnly(true);
         }
 
         for (Class<?> c : modelTypes) {

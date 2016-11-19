@@ -107,7 +107,7 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
         return $.cast(svc);
     }
 
-    protected EbeanServer ebean() {
+    public EbeanServer ebean() {
         if (null != ebean) {
             return ebean;
         }

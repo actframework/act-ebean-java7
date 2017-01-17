@@ -1,6 +1,5 @@
 package act.db.ebean;
 
-import act.app.App;
 import act.app.DbServiceManager;
 import act.db.DB;
 import act.db.DaoBase;
@@ -27,21 +26,19 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import static act.Act.app;
+
 @General
 public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, EbeanQuery<MODEL_TYPE>> {
 
     private static final Logger logger = L.get(EbeanDao.class);
 
     private volatile EbeanServer ebean;
-    private Class<MODEL_TYPE> modelClass;
     private String tableName;
     private Field idField = null;
     private List<QueryIterator> queryIterators = C.newList();
 
-    private App app;
-
     EbeanDao(EbeanService service) {
-        this.modelClass = modelType();
         for (Field f: modelType().getDeclaredFields()) {
             Id idAnno = f.getAnnotation(Id.class);
             if (null != idAnno) {
@@ -52,13 +49,11 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
         }
         this.ebean = service.ebean();
         this.tableName = ((SpiEbeanServer) ebean).getBeanDescriptor(modelType()).getBaseTable();
-        this.app = service.app();
     }
 
     EbeanDao(Class<ID_TYPE> idType, Class<MODEL_TYPE> modelType, EbeanService service) {
         super(idType, modelType);
         this.ebean = $.notNull(service.ebean());
-        this.modelClass = modelType();
         for (Field f: modelType.getDeclaredFields()) {
             Id idAnno = f.getAnnotation(Id.class);
             if (null != idAnno) {
@@ -68,15 +63,14 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
             }
         }
         this.tableName = ((SpiEbeanServer) ebean).getBeanDescriptor(modelType).getBaseTable();
-        this.app = service.app();
     }
 
     @Inject
-    protected EbeanDao(Class<ID_TYPE> id_type, Class<MODEL_TYPE> modelType) {
+    public EbeanDao(Class<ID_TYPE> id_type, Class<MODEL_TYPE> modelType) {
         super(id_type, modelType);
-        this.app = App.instance();
-        this.modelClass = modelType;
     }
+
+    public EbeanDao() {}
 
     public void ebean(EbeanServer ebean) {
         this.ebean = $.notNull(ebean);
@@ -114,9 +108,9 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
         }
         synchronized (this) {
             if (null == ebean) {
-                DB db = modelClass.getAnnotation(DB.class);
+                DB db = modelType().getAnnotation(DB.class);
                 String dbId = null == db ? DbServiceManager.DEFAULT : db.value();
-                EbeanService dbService = getService(dbId, app.dbServiceManager());
+                EbeanService dbService = getService(dbId, app().dbServiceManager());
                 E.NPE(dbService);
                 ebean = dbService.ebean();
             }
@@ -130,7 +124,7 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
 
     @Override
     public MODEL_TYPE findById(ID_TYPE id) {
-        return ebean().find(modelClass, id);
+        return ebean().find(modelType(), id);
     }
 
     @Override
@@ -239,7 +233,7 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
 
     @Override
     public EbeanQuery<MODEL_TYPE> q() {
-        return new EbeanQuery<MODEL_TYPE>(this, modelClass);
+        return new EbeanQuery<MODEL_TYPE>(this, modelType());
     }
 
     private enum R2 {

@@ -6,10 +6,7 @@ import act.db.DaoBase;
 import act.db.DbService;
 import act.db.Model;
 import act.util.General;
-import com.avaje.ebean.EbeanServer;
-import com.avaje.ebean.ExpressionList;
-import com.avaje.ebean.QueryIterator;
-import com.avaje.ebean.SqlUpdate;
+import com.avaje.ebean.*;
 import com.avaje.ebeaninternal.api.SpiEbeanServer;
 import org.osgl.$;
 import org.osgl.logging.L;
@@ -210,7 +207,7 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
 
     @Override
     public void delete(EbeanQuery<MODEL_TYPE> query) {
-        ebean().delete(query);
+        ebean().delete(query.rawQuery(), null);
     }
 
     @Override
@@ -220,13 +217,12 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
 
     @Override
     public void deleteBy(String fields, Object... values) throws IllegalArgumentException {
-        EbeanQuery<MODEL_TYPE> q = q(fields, values);
-        ebean().delete(q);
+        delete(q(fields, values));
     }
 
     @Override
     public void deleteAll() {
-        ebean().delete(q());
+        delete(q());
     }
 
     @Override

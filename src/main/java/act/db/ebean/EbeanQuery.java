@@ -40,6 +40,10 @@ public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODE
         this.dao = dao;
     }
 
+    public Query<MODEL_TYPE> rawQuery() {
+        return q;
+    }
+
     @Override
     public Query<MODEL_TYPE> asOf(Timestamp timestamp) {
         return q.asOf(timestamp);

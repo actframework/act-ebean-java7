@@ -225,6 +225,11 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
     }
 
     @Override
+    public void deleteAll() {
+        ebean().delete(q());
+    }
+
+    @Override
     public void drop() {
         String sql = "DELETE from " + tableName;
         SqlUpdate sqlUpdate = ebean().createSqlUpdate(sql);
@@ -234,6 +239,11 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
     @Override
     public EbeanQuery<MODEL_TYPE> q() {
         return new EbeanQuery<MODEL_TYPE>(this, modelType());
+    }
+
+    @Override
+    public EbeanQuery<MODEL_TYPE> createQuery() {
+        return q();
     }
 
     private enum R2 {
@@ -446,4 +456,8 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
         return q;
     }
 
+    @Override
+    public EbeanQuery<MODEL_TYPE> createQuery(String s, Object... objects) {
+        return q(s, objects);
+    }
 }

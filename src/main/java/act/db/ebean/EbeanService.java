@@ -34,7 +34,6 @@ import java.util.Set;
 import static act.app.event.AppEventId.CLASS_LOADED;
 import static act.app.event.AppEventId.PRE_LOAD_CLASSES;
 
-@ActComponent
 public final class EbeanService extends DbService {
 
     private static Logger logger = LogManager.get(EbeanService.class);
@@ -133,6 +132,9 @@ public final class EbeanService extends DbService {
     private ServerConfig serverConfig(String id, Map<String, Object> conf) {
         ServerConfig sc = new ServerConfig();
         sc.setName(id);
+        Properties properties = new Properties();
+        properties.putAll(conf);
+        sc.loadFromProperties(properties);
 
         sc.setDataSourceConfig(datasourceConfig(conf));
 

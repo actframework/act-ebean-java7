@@ -189,19 +189,33 @@ public final class EbeanService extends DbService {
         }
         dsc.setPassword(password);
 
-        String driver = dsc.getDriver();
-        if (null == driver) {
-            logger.warn("No database driver configuration specified. Will use the default h2 driver!");
-            driver = "org.h2.Driver";
-        }
-        dsc.setDriver(driver);
-
         String url = dsc.getUrl();
         if (null == url) {
             logger.warn("No database URL configuration specified. Will use the default h2 inmemory test database");
             url = "jdbc:h2:mem:tests";
         }
         dsc.setUrl(url);
+
+        String driver = dsc.getDriver();
+        if (null == driver) {
+            if (url.contains("mysql")) {
+                driver = "com.mysql.jdbc.Driver";
+            } else if (url.contains("postgresql")) {
+                driver = "org.postgresql.Driver";
+            } else if (url.contains("jdbc:h2:")) {
+                driver = "org.h2.Driver";
+            } else if (url.contains("jdbc:oracle")) {
+                driver = "oracle.jdbc.OracleDriver";
+            } else if (url.contains("sqlserver")) {
+                driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+            } else if (url.contains("jdbc:db2")) {
+                driver = "com.ibm.db2.jcc.DB2Driver";
+            } else {
+                throw E.invalidConfiguration("JDBC driver needs to be configured for datasource: %s", id());
+            }
+            logger.warn("JDBC driver not configured, system automatically set to: " + driver);
+        }
+        dsc.setDriver(driver);
     }
 
     public static void registerModelType(Class<?> modelType) {

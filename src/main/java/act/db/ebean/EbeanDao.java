@@ -186,8 +186,9 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
     }
 
     @Override
-    public void save(MODEL_TYPE entity) {
+    public MODEL_TYPE save(MODEL_TYPE entity) {
         ebean().save(entity);
+        return entity;
     }
 
     @Override

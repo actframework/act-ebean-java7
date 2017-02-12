@@ -5,6 +5,7 @@ import act.db.DB;
 import act.db.DaoBase;
 import act.db.DbService;
 import act.db.Model;
+import act.inject.param.NoBind;
 import act.util.General;
 import com.avaje.ebean.*;
 import com.avaje.ebeaninternal.api.SpiEbeanServer;
@@ -26,6 +27,7 @@ import java.util.List;
 import static act.Act.app;
 
 @General
+@NoBind
 public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, EbeanQuery<MODEL_TYPE>> {
 
     private static final Logger logger = L.get(EbeanDao.class);

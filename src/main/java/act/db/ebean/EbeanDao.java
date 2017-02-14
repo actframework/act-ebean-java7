@@ -197,6 +197,11 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
         return entity;
     }
 
+    public MODEL_TYPE save(Transaction tx, MODEL_TYPE entity) {
+        ebean().save(entity, tx);
+        return entity;
+    }
+
     @Override
     public void save(Iterable<MODEL_TYPE> iterable) {
         List<MODEL_TYPE> list = C.list(iterable);
@@ -217,8 +222,8 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
         }
     }
 
-    public void save(Iterable<MODEL_TYPE> iterable, Transaction tx) {
-        ebean().saveAll(C.list(iterable));
+    public void save(Transaction tx, Iterable<MODEL_TYPE> iterable) {
+        ebean().saveAll(C.list(iterable), tx);
     }
 
     @Override
@@ -226,9 +231,17 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
         ebean().update(entity);
     }
 
+    public void save(Transaction tx, MODEL_TYPE entity, String fields, Object... values) throws IllegalArgumentException {
+        ebean().update(entity, tx);
+    }
+
     @Override
     public void delete(MODEL_TYPE entity) {
         ebean().delete(entity);
+    }
+
+    public void delete(Transaction tx, MODEL_TYPE entity) {
+        ebean().delete(entity, tx);
     }
 
     @Override
@@ -236,9 +249,17 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
         ebean().delete(query.rawQuery(), null);
     }
 
+    public void delete(Transaction tx, EbeanQuery<MODEL_TYPE> query) {
+        ebean().delete(query.rawQuery(), tx);
+    }
+
     @Override
     public void deleteById(ID_TYPE id) {
         ebean().delete(modelType(), id);
+    }
+
+    public void deleteById(Transaction tx, ID_TYPE id) {
+        ebean().delete(modelType(), id, tx);
     }
 
     @Override
@@ -246,9 +267,17 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
         delete(q(fields, values));
     }
 
+    public void deleteBy(Transaction tx, String fields, Object... values) throws IllegalArgumentException {
+        delete(tx, q(fields, values));
+    }
+
     @Override
     public void deleteAll() {
         delete(q());
+    }
+
+    public void deleteAll(Transaction tx) {
+        delete(tx, q());
     }
 
     @Override

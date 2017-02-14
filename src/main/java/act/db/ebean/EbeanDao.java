@@ -1,5 +1,6 @@
 package act.db.ebean;
 
+import act.Act;
 import act.app.DbServiceManager;
 import act.db.DB;
 import act.db.DaoBase;
@@ -17,8 +18,11 @@ import org.osgl.util.S;
 
 import javax.inject.Inject;
 import javax.persistence.Id;
+import javax.persistence.PersistenceException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.sql.BatchUpdateException;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -192,6 +196,25 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
 
     @Override
     public void save(Iterable<MODEL_TYPE> iterable) {
+        List<MODEL_TYPE> list = C.list(iterable);
+        if (list.isEmpty()) {
+            return;
+        }
+        Transaction transaction = ebean().createTransaction(TxIsolation.READ_COMMITED);
+        transaction.setBatchMode(true);
+        transaction.setBatchSize(list.size());
+        try {
+            ebean().saveAll(list);
+            transaction.commit();
+        } catch (RuntimeException e) {
+            transaction.rollback();
+            throw e;
+        } finally {
+            transaction.end();
+        }
+    }
+
+    public void save(Iterable<MODEL_TYPE> iterable, Transaction tx) {
         ebean().saveAll(C.list(iterable));
     }
 

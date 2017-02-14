@@ -215,7 +215,7 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
     }
 
     public void save(Iterable<MODEL_TYPE> iterable, Transaction tx) {
-        ebean().saveAll(C.list(iterable));
+        ebean().saveAll(C.list(iterable), tx);
     }
 
     @Override

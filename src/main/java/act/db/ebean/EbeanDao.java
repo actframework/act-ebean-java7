@@ -203,10 +203,10 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
     }
 
     @Override
-    public void save(Iterable<MODEL_TYPE> iterable) {
+    public List<MODEL_TYPE> save(Iterable<MODEL_TYPE> iterable) {
         List<MODEL_TYPE> list = C.list(iterable);
         if (list.isEmpty()) {
-            return;
+            return list;
         }
         Transaction transaction = ebean().createTransaction(TxIsolation.READ_COMMITED);
         transaction.setBatchMode(true);
@@ -220,6 +220,7 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
         } finally {
             transaction.end();
         }
+        return list;
     }
 
     public void save(Transaction tx, Iterable<MODEL_TYPE> iterable) {

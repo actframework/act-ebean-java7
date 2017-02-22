@@ -223,8 +223,10 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
         return list;
     }
 
-    public void save(Transaction tx, Iterable<MODEL_TYPE> iterable) {
-        ebean().saveAll(C.list(iterable), tx);
+    public List<MODEL_TYPE> save(Transaction tx, Iterable<MODEL_TYPE> iterable) {
+        List<MODEL_TYPE> list = C.list(iterable);
+        ebean().saveAll(list, tx);
+        return list;
     }
 
     @Override

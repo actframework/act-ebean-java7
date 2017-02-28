@@ -1,7 +1,6 @@
 package act.db.ebean;
 
 import act.Act;
-import act.ActComponent;
 import act.app.App;
 import act.app.DbServiceManager;
 import act.conf.AppConfigKey;
@@ -23,6 +22,7 @@ import org.osgl.util.S;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.PersistenceException;
+import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -136,20 +136,30 @@ public final class EbeanService extends DbService {
         properties.putAll(conf);
         sc.loadFromProperties(properties);
 
-        sc.setDataSourceConfig(datasourceConfig(conf));
+        DataSourceConfig dsc = datasourceConfig(conf);
+        sc.setDataSourceConfig(dsc);
 
+        boolean noddl = false;
         String ddlGenerate = (String) conf.get("ddl.generate");
         if (null != ddlGenerate) {
             sc.setDdlGenerate(Boolean.parseBoolean(ddlGenerate));
         } else if (Act.isDev()) {
-            sc.setDdlGenerate(true);
+            String url = dsc.getUrl();
+            if (url.startsWith("jdbc:h2:")) {
+                String file = url.substring("jdbc:h2:".length()) + ".mv.db";
+                File _file = new File(file);
+                if (_file.exists()) {
+                    noddl = true;
+                }
+            }
+            sc.setDdlGenerate(!noddl);
         }
 
         String ddlRun = (String) conf.get("ddl.run");
         if (null != ddlRun) {
             sc.setDdlRun(Boolean.parseBoolean(ddlRun));
         } else if (Act.isDev()) {
-            sc.setDdlRun(true);
+            sc.setDdlRun(noddl);
         }
 
         String ddlCreateOnly = (String) conf.get("ddl.createOnly");

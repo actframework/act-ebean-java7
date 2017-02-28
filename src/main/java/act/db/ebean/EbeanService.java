@@ -159,14 +159,14 @@ public final class EbeanService extends DbService {
         if (null != ddlRun) {
             sc.setDdlRun(Boolean.parseBoolean(ddlRun));
         } else if (Act.isDev()) {
-            sc.setDdlRun(noddl);
+            sc.setDdlRun(!noddl);
         }
 
         String ddlCreateOnly = (String) conf.get("ddl.createOnly");
         if (null != ddlCreateOnly) {
             sc.setDdlCreateOnly(Boolean.parseBoolean(ddlCreateOnly));
-        } else {
-            sc.setDdlCreateOnly(true);
+        } else if (Act.isDev()) {
+            sc.setDdlCreateOnly(!noddl);
         }
 
         for (Class<?> c : modelTypes) {

@@ -5,6 +5,7 @@ import act.db.DbService;
 import act.db.di.DaoInjectionListenerBase;
 import org.osgl.$;
 import org.osgl.inject.BeanSpec;
+import org.osgl.util.Generics;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -19,6 +20,9 @@ public class EbeanDaoInjectionListener extends DaoInjectionListenerBase {
     @Override
     public void onInjection(Object injectee, BeanSpec spec) {
         List<Type> typeParameters = spec.typeParams();
+        if (typeParameters.isEmpty()) {
+            typeParameters = Generics.typeParamImplementations(spec.rawType(), EbeanDao.class);
+        }
         if (null == typeParameters) {
             logger.warn("No type parameter information provided");
             return;

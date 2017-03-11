@@ -1,6 +1,5 @@
 package act.db.ebean;
 
-import act.Act;
 import act.app.DbServiceManager;
 import act.db.DB;
 import act.db.DaoBase;
@@ -17,13 +16,9 @@ import org.osgl.util.C;
 import org.osgl.util.E;
 import org.osgl.util.S;
 
-import javax.inject.Inject;
 import javax.persistence.Id;
-import javax.persistence.PersistenceException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.sql.BatchUpdateException;
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -42,41 +37,28 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
     private List<QueryIterator> queryIterators = C.newList();
 
     EbeanDao(EbeanService service) {
-        for (Field f: modelType().getDeclaredFields()) {
-            Id idAnno = f.getAnnotation(Id.class);
-            if (null != idAnno) {
-                idField = f;
-                f.setAccessible(true);
-                break;
-            }
-        }
-        this.ebean = service.ebean();
-        this.tableName = ((SpiEbeanServer) ebean).getBeanDescriptor(modelType()).getBaseTable();
+        init(modelType());
+        this.ebean(service.ebean());
     }
 
     EbeanDao(Class<ID_TYPE> idType, Class<MODEL_TYPE> modelType, EbeanService service) {
         super(idType, modelType);
-        this.ebean = $.notNull(service.ebean());
-        for (Field f: modelType.getDeclaredFields()) {
-            Id idAnno = f.getAnnotation(Id.class);
-            if (null != idAnno) {
-                idField = f;
-                f.setAccessible(true);
-                break;
-            }
-        }
-        this.tableName = ((SpiEbeanServer) ebean).getBeanDescriptor(modelType).getBaseTable();
+        init(modelType);
+        this.ebean(service.ebean());
     }
 
-    @Inject
     public EbeanDao(Class<ID_TYPE> id_type, Class<MODEL_TYPE> modelType) {
         super(id_type, modelType);
+        init(modelType);
     }
 
-    public EbeanDao() {}
+    public EbeanDao() {
+        init(modelType());
+    }
 
     public void ebean(EbeanServer ebean) {
         this.ebean = $.notNull(ebean);
+        this.tableName = ((SpiEbeanServer) ebean).getBeanDescriptor(modelType()).getBaseTable();
     }
 
     public void modelType(Class<?> type) {
@@ -95,6 +77,20 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
             }
             queryIterators.clear();
             queryIterators = null;
+        }
+    }
+
+    private void init(Class<MODEL_TYPE> modelType) {
+        for (Field f: modelType.getDeclaredFields()) {
+            Id idAnno = f.getAnnotation(Id.class);
+            if (null != idAnno) {
+                idField = f;
+                f.setAccessible(true);
+                break;
+            }
+        }
+        if (null != ebean) {
+            this.tableName = ((SpiEbeanServer) ebean).getBeanDescriptor(modelType()).getBaseTable();
         }
     }
 

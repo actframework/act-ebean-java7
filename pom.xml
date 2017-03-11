@@ -18,6 +18,9 @@
 ********************************************
 *            version history
 ********************************************
+1.0.1
+- Fix #1 EbeanDao.drop() method cause JdbcSQLException
+- Fix #3 EbeanInjectionListener not effect on User defined Dao
 1.0.0
 - the first formal release
 0.7.0 - update act to 0.7.0

@@ -17,6 +17,7 @@ import org.osgl.util.E;
 import org.osgl.util.S;
 
 import javax.persistence.Id;
+import javax.sql.DataSource;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -32,6 +33,7 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
     private static final Logger logger = L.get(EbeanDao.class);
 
     private volatile EbeanServer ebean;
+    private volatile DataSource ds;
     private String tableName;
     private Field idField = null;
     private List<QueryIterator> queryIterators = C.newList();
@@ -45,6 +47,7 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
         super(idType, modelType);
         init(modelType);
         this.ebean(service.ebean());
+        this.ds = service.ds();
     }
 
     public EbeanDao(Class<ID_TYPE> id_type, Class<MODEL_TYPE> modelType) {
@@ -115,6 +118,22 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
             }
         }
         return ebean;
+    }
+
+    public DataSource ds() {
+        if (null != ds) {
+            return ds;
+        }
+        synchronized (this) {
+            if (null == ds) {
+                DB db = modelType().getAnnotation(DB.class);
+                String dbId = null == db ? DbServiceManager.DEFAULT : db.value();
+                EbeanService dbService = getService(dbId, app().dbServiceManager());
+                E.NPE(dbService);
+                ds = dbService.ds();
+            }
+        }
+        return ds;
     }
 
     void registerQueryIterator(QueryIterator i) {

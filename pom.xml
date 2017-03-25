@@ -18,6 +18,9 @@
 ********************************************
 *            version history
 ********************************************
+1.0.2
+- #4 use HikariCP for connection pool
+- #5 Make it easy to do low level JDBC logic
 1.0.1
 - Fix #1 EbeanDao.drop() method cause JdbcSQLException
 - Fix #3 EbeanInjectionListener not effect on User defined Dao
@@ -56,6 +59,7 @@
     <ebean-agent.version>8.1.1</ebean-agent.version>
     <ebean-agent-loader.version>2.1.2</ebean-agent-loader.version>
     <mockito-core.version>2.7.0</mockito-core.version>
+    <HikariCP.version>2.6.1</HikariCP.version>
   </properties>
 
   <parent>
@@ -172,6 +176,13 @@
       <artifactId>act</artifactId>
       <version>${act.version}</version>
       <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.zaxxer</groupId>
+      <artifactId>HikariCP</artifactId>
+      <version>${HikariCP.version}</version>
+      <scope>compile</scope>
     </dependency>
 
   </dependencies>

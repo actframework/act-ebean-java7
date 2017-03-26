@@ -18,6 +18,10 @@
 ********************************************
 *            version history
 ********************************************
+1.0.4
+- take out version range from pom.xml. See https://issues.apache.org/jira/browse/MNG-3092
+1.0.3
+- version number of mistake
 1.0.2
 - #4 use HikariCP for connection pool
 - #5 Make it easy to do low level JDBC logic
@@ -54,7 +58,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <git.url>git@github.com:actframework/act-ebean.git</git.url>
-    <act.version>[1.0.0, 2.0.0)</act.version>
+    <act.version>1.0.5</act.version>
     <ebean.version>8.8.1</ebean.version>
     <ebean-agent.version>8.1.1</ebean-agent.version>
     <ebean-agent-loader.version>2.1.2</ebean-agent-loader.version>

@@ -146,23 +146,22 @@ public final class EbeanService extends DbService {
         properties.putAll(conf);
         sc.loadFromProperties(properties);
 
+        Object o = conf.get("url");
+        if (null == o) {
+            o = conf.get("jdbcUrl");
+        }
+        E.invalidConfigurationIf(null == o, "JDBC URL required");
+        // We need to check h2 db file existence before loading HikariDatasource
+        // otherwise it will generate the h2 db file if it does not exist
+        boolean noddl = h2DbFileExists(S.string(o));
         HikariDataSource dataSource = dataSource(conf);
         sc.setDataSource(dataSource);
         ds = dataSource;
 
-        boolean noddl = false;
         String ddlGenerate = (String) conf.get("ddl.generate");
         if (null != ddlGenerate) {
             sc.setDdlGenerate(Boolean.parseBoolean(ddlGenerate));
         } else if (Act.isDev()) {
-            String url = dataSource.getJdbcUrl();
-            if (url.startsWith("jdbc:h2:")) {
-                String file = url.substring("jdbc:h2:".length()) + ".mv.db";
-                File _file = new File(file);
-                if (_file.exists()) {
-                    noddl = true;
-                }
-            }
             sc.setDdlGenerate(!noddl);
         }
 
@@ -185,6 +184,18 @@ public final class EbeanService extends DbService {
         }
 
         return sc;
+    }
+
+    private boolean h2DbFileExists(String jdbcUrl) {
+        if (Act.isProd()) {
+            return true;
+        }
+        if (jdbcUrl.startsWith("jdbc:h2:")) {
+            String file = jdbcUrl.substring("jdbc:h2:".length()) + ".mv.db";
+            File _file = new File(file);
+            return (_file.exists());
+        }
+        return false;
     }
 
     private HikariDataSource dataSource(Map<String, Object> conf) {

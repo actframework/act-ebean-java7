@@ -11,6 +11,8 @@ import com.avaje.ebean.Ebean;
 import com.avaje.ebean.EbeanServer;
 import com.avaje.ebean.EbeanServerFactory;
 import com.avaje.ebean.config.ServerConfig;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.avaje.datasource.DataSourceConfig;
 import org.osgl.$;
 import org.osgl.logging.LogManager;
@@ -22,6 +24,7 @@ import org.osgl.util.S;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.PersistenceException;
+import javax.sql.DataSource;
 import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
@@ -44,6 +47,9 @@ public final class EbeanService extends DbService {
     private Map<String, Object> conf;
 
     private ServerConfig serverConfig;
+
+    // the datasource for low level JDBC API usage
+    private DataSource ds;
 
     private static Set<Class<?>> modelTypes = C.newSet();
 
@@ -129,6 +135,10 @@ public final class EbeanService extends DbService {
         return ebean;
     }
 
+    public DataSource ds() {
+        return ds;
+    }
+
     private ServerConfig serverConfig(String id, Map<String, Object> conf) {
         ServerConfig sc = new ServerConfig();
         sc.setName(id);
@@ -136,15 +146,16 @@ public final class EbeanService extends DbService {
         properties.putAll(conf);
         sc.loadFromProperties(properties);
 
-        DataSourceConfig dsc = datasourceConfig(conf);
-        sc.setDataSourceConfig(dsc);
+        HikariDataSource dataSource = dataSource(conf);
+        sc.setDataSource(dataSource);
+        ds = dataSource;
 
         boolean noddl = false;
         String ddlGenerate = (String) conf.get("ddl.generate");
         if (null != ddlGenerate) {
             sc.setDdlGenerate(Boolean.parseBoolean(ddlGenerate));
         } else if (Act.isDev()) {
-            String url = dsc.getUrl();
+            String url = dataSource.getJdbcUrl();
             if (url.startsWith("jdbc:h2:")) {
                 String file = url.substring("jdbc:h2:".length()) + ".mv.db";
                 File _file = new File(file);
@@ -176,13 +187,83 @@ public final class EbeanService extends DbService {
         return sc;
     }
 
-    private DataSourceConfig datasourceConfig(Map<String, Object> conf) {
-        Properties properties = new Properties();
-        properties.putAll(conf);
-        DataSourceConfig dsc = new DataSourceConfig();
-        dsc.loadSettings(properties, "");
-        ensureDefaultDatasourceConfig(dsc);
-        return dsc;
+    private HikariDataSource dataSource(Map<String, Object> conf) {
+        HikariConfig hc = new HikariConfig();
+        for (Map.Entry<String, Object> entry : conf.entrySet()) {
+            String key = entry.getKey();
+            Object val = entry.getValue();
+            if ("username".equals(key)) {
+                hc.setUsername(S.string(val));
+            } else if ("password".equals(key)) {
+                hc.setPassword(S.string(val));
+            } else if ("url".equals(key) || "jdbcUrl".equals(key)) {
+                hc.setJdbcUrl(S.string(val));
+            } else if ("maximumPoolSize".equals(key)) {
+                hc.setMaximumPoolSize(Integer.parseInt(S.string(val)));
+            } else if ("autoCommit".equals(key)) {
+                hc.setAutoCommit(Boolean.valueOf(S.string(val)));
+            } else if ("idleTimeout".equals(key)) {
+                hc.setIdleTimeout(Long.parseLong(S.string(val)));
+            } else if ("maxLifetime".equals(key)) {
+                hc.setMaxLifetime(Long.parseLong(S.string(val)));
+            } else if ("connectionTimeout".equals(key)) {
+                hc.setConnectionTimeout(Long.parseLong(S.string(val)));
+            } else if ("minimumIdle".equals(key)) {
+                hc.setMinimumIdle(Integer.parseInt(S.string(val)));
+            } else if ("poolName".equals(key)) {
+                hc.setPoolName(S.string(val));
+            } else if ("driverClassName".equals(key)) {
+                hc.setDriverClassName(S.string(val));
+            } else {
+                hc.addDataSourceProperty(entry.getKey(), entry.getValue());
+            }
+        }
+        ensureDefaultDatasourceConfig(hc);
+        return new HikariDataSource(hc);
+    }
+
+    private void ensureDefaultDatasourceConfig(HikariConfig dsc) {
+        String username = dsc.getUsername();
+        if (null == username) {
+            logger.warn("No data source user configuration specified. Will use the default 'sa' user");
+            username = "sa";
+        }
+        dsc.setUsername(username);
+
+        String password = dsc.getPassword();
+        if (null == password) {
+            password = "";
+        }
+        dsc.setPassword(password);
+
+        String url = dsc.getJdbcUrl();
+        if (null == url) {
+            logger.warn("No database URL configuration specified. Will use the default h2 inmemory test database");
+            url = "jdbc:h2:mem:tests";
+        }
+        dsc.setJdbcUrl(url);
+
+
+        String driver = dsc.getDriverClassName();
+        if (null == driver) {
+            if (url.contains("mysql")) {
+                driver = "com.mysql.jdbc.Driver";
+            } else if (url.contains("postgresql")) {
+                driver = "org.postgresql.Driver";
+            } else if (url.contains("jdbc:h2:")) {
+                driver = "org.h2.Driver";
+            } else if (url.contains("jdbc:oracle")) {
+                driver = "oracle.jdbc.OracleDriver";
+            } else if (url.contains("sqlserver")) {
+                driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+            } else if (url.contains("jdbc:db2")) {
+                driver = "com.ibm.db2.jcc.DB2Driver";
+            } else {
+                throw E.invalidConfiguration("JDBC driver needs to be configured for datasource: %s", id());
+            }
+            logger.warn("JDBC driver not configured, system automatically set to: " + driver);
+        }
+        dsc.setDriverClassName(driver);
     }
 
     private void ensureDefaultDatasourceConfig(DataSourceConfig dsc) {

@@ -18,6 +18,12 @@
 ********************************************
 *            version history
 ********************************************
+1.1.0
+- #9 Support plugin different datasource solution
+- #8 change mysql jdbc driver class name
+- #6 Support Druid database
+1.0.5
+- fix #7 It reports XXX table not found when start app in dev mode
 1.0.4
 - take out version range from pom.xml. See https://issues.apache.org/jira/browse/MNG-3092
 1.0.3
@@ -48,7 +54,7 @@
   <groupId>org.actframework</groupId>
   <artifactId>act-ebean</artifactId>
   <packaging>jar</packaging>
-  <version>1.0.6-SNAPSHOT</version>
+  <version>1.1.0-SNAPSHOT</version>
 
   <name>ACT Ebean</name>
   <description>The Ebean Plugin for Actframework SQL database access</description>
@@ -58,12 +64,13 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <git.url>git@github.com:actframework/act-ebean.git</git.url>
-    <act.version>1.0.5</act.version>
+    <act.version>1.0.6</act.version>
     <ebean.version>8.8.1</ebean.version>
     <ebean-agent.version>8.1.1</ebean-agent.version>
     <ebean-agent-loader.version>2.1.2</ebean-agent-loader.version>
     <mockito-core.version>2.7.0</mockito-core.version>
     <HikariCP.version>2.6.1</HikariCP.version>
+    <druid.version>1.0.29</druid.version>
   </properties>
 
   <parent>
@@ -186,7 +193,14 @@
       <groupId>com.zaxxer</groupId>
       <artifactId>HikariCP</artifactId>
       <version>${HikariCP.version}</version>
-      <scope>compile</scope>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.alibaba</groupId>
+      <artifactId>druid</artifactId>
+      <version>${druid.version}</version>
+      <scope>provided</scope>
     </dependency>
 
   </dependencies>

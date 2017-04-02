@@ -11,8 +11,6 @@ import com.avaje.ebean.Ebean;
 import com.avaje.ebean.EbeanServer;
 import com.avaje.ebean.EbeanServerFactory;
 import com.avaje.ebean.config.ServerConfig;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import org.avaje.datasource.DataSourceConfig;
 import org.osgl.$;
 import org.osgl.logging.LogManager;
@@ -140,141 +138,74 @@ public final class EbeanService extends DbService {
     }
 
     private ServerConfig serverConfig(String id, Map<String, Object> conf) {
-        ServerConfig sc = new ServerConfig();
-        sc.setName(id);
+        ServerConfig serverConfig = new ServerConfig();
+        serverConfig.setName(id);
         Properties properties = new Properties();
         properties.putAll(conf);
-        sc.loadFromProperties(properties);
+        serverConfig.loadFromProperties(properties);
 
         Object o = conf.get("url");
         if (null == o) {
             o = conf.get("jdbcUrl");
         }
         E.invalidConfigurationIf(null == o, "JDBC URL required");
+
         // We need to check h2 db file existence before loading HikariDatasource
         // otherwise it will generate the h2 db file if it does not exist
         boolean noddl = h2DbFileExists(S.string(o));
-        HikariDataSource dataSource = dataSource(conf);
-        sc.setDataSource(dataSource);
-        ds = dataSource;
+
+        DataSourceProvider dataSourceProvider = dataSourceProvider(conf);
+        if (null != dataSourceProvider) {
+            // process conf mapping
+            Map<String, String> confMapping = dataSourceProvider.confKeyMapping();
+            for (Map.Entry<String, String> entry : confMapping.entrySet()) {
+                String solutionKey = entry.getKey();
+                String commonKey = entry.getValue();
+                if (conf.containsKey(solutionKey)) {
+                    conf.put(commonKey, conf.get(solutionKey));
+                }
+            }
+            serverConfig.setDataSource(dataSourceProvider.createDataSource(datasourceConfig(conf)));
+        } else {
+            serverConfig.setDataSourceConfig(datasourceConfig(conf));
+        }
 
         String ddlGenerate = (String) conf.get("ddl.generate");
         if (null != ddlGenerate) {
-            sc.setDdlGenerate(Boolean.parseBoolean(ddlGenerate));
+            serverConfig.setDdlGenerate(Boolean.parseBoolean(ddlGenerate));
         } else if (Act.isDev()) {
-            sc.setDdlGenerate(!noddl);
+            serverConfig.setDdlGenerate(!noddl);
         }
 
         String ddlRun = (String) conf.get("ddl.run");
         if (null != ddlRun) {
-            sc.setDdlRun(Boolean.parseBoolean(ddlRun));
+            serverConfig.setDdlRun(Boolean.parseBoolean(ddlRun));
         } else if (Act.isDev()) {
-            sc.setDdlRun(!noddl);
+            serverConfig.setDdlRun(!noddl);
         }
 
         String ddlCreateOnly = (String) conf.get("ddl.createOnly");
         if (null != ddlCreateOnly) {
-            sc.setDdlCreateOnly(Boolean.parseBoolean(ddlCreateOnly));
+            serverConfig.setDdlCreateOnly(Boolean.parseBoolean(ddlCreateOnly));
         } else if (Act.isDev()) {
-            sc.setDdlCreateOnly(!noddl);
+            serverConfig.setDdlCreateOnly(!noddl);
         }
 
         for (Class<?> c : modelTypes) {
-            sc.addClass(c);
+            serverConfig.addClass(c);
         }
 
-        return sc;
+        return serverConfig;
     }
 
-    private boolean h2DbFileExists(String jdbcUrl) {
-        if (Act.isProd()) {
-            return true;
-        }
-        if (jdbcUrl.startsWith("jdbc:h2:")) {
-            String file = jdbcUrl.substring("jdbc:h2:".length()) + ".mv.db";
-            File _file = new File(file);
-            return (_file.exists());
-        }
-        return false;
-    }
-
-    private HikariDataSource dataSource(Map<String, Object> conf) {
-        HikariConfig hc = new HikariConfig();
-        for (Map.Entry<String, Object> entry : conf.entrySet()) {
-            String key = entry.getKey();
-            Object val = entry.getValue();
-            if ("username".equals(key)) {
-                hc.setUsername(S.string(val));
-            } else if ("password".equals(key)) {
-                hc.setPassword(S.string(val));
-            } else if ("url".equals(key) || "jdbcUrl".equals(key)) {
-                hc.setJdbcUrl(S.string(val));
-            } else if ("maximumPoolSize".equals(key)) {
-                hc.setMaximumPoolSize(Integer.parseInt(S.string(val)));
-            } else if ("autoCommit".equals(key)) {
-                hc.setAutoCommit(Boolean.valueOf(S.string(val)));
-            } else if ("idleTimeout".equals(key)) {
-                hc.setIdleTimeout(Long.parseLong(S.string(val)));
-            } else if ("maxLifetime".equals(key)) {
-                hc.setMaxLifetime(Long.parseLong(S.string(val)));
-            } else if ("connectionTimeout".equals(key)) {
-                hc.setConnectionTimeout(Long.parseLong(S.string(val)));
-            } else if ("minimumIdle".equals(key)) {
-                hc.setMinimumIdle(Integer.parseInt(S.string(val)));
-            } else if ("poolName".equals(key)) {
-                hc.setPoolName(S.string(val));
-            } else if ("driverClassName".equals(key)) {
-                hc.setDriverClassName(S.string(val));
-            } else {
-                hc.addDataSourceProperty(entry.getKey(), entry.getValue());
-            }
-        }
-        ensureDefaultDatasourceConfig(hc);
-        return new HikariDataSource(hc);
-    }
-
-    private void ensureDefaultDatasourceConfig(HikariConfig dsc) {
-        String username = dsc.getUsername();
-        if (null == username) {
-            logger.warn("No data source user configuration specified. Will use the default 'sa' user");
-            username = "sa";
-        }
-        dsc.setUsername(username);
-
-        String password = dsc.getPassword();
-        if (null == password) {
-            password = "";
-        }
-        dsc.setPassword(password);
-
-        String url = dsc.getJdbcUrl();
-        if (null == url) {
-            logger.warn("No database URL configuration specified. Will use the default h2 inmemory test database");
-            url = "jdbc:h2:mem:tests";
-        }
-        dsc.setJdbcUrl(url);
-
-
-        String driver = dsc.getDriverClassName();
-        if (null == driver) {
-            if (url.contains("mysql")) {
-                driver = "com.mysql.jdbc.Driver";
-            } else if (url.contains("postgresql")) {
-                driver = "org.postgresql.Driver";
-            } else if (url.contains("jdbc:h2:")) {
-                driver = "org.h2.Driver";
-            } else if (url.contains("jdbc:oracle")) {
-                driver = "oracle.jdbc.OracleDriver";
-            } else if (url.contains("sqlserver")) {
-                driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-            } else if (url.contains("jdbc:db2")) {
-                driver = "com.ibm.db2.jcc.DB2Driver";
-            } else {
-                throw E.invalidConfiguration("JDBC driver needs to be configured for datasource: %s", id());
-            }
-            logger.warn("JDBC driver not configured, system automatically set to: " + driver);
-        }
-        dsc.setDriverClassName(driver);
+    private DataSourceConfig datasourceConfig(Map<String, Object> conf) {
+        Properties properties = new Properties();
+        properties.putAll(conf);
+        DataSourceConfig dsc = new DataSourceConfig();
+        dsc.loadSettings(properties, "");
+        ensureDefaultDatasourceConfig(dsc);
+        dsc.setCustomProperties((Map)properties);
+        return dsc;
     }
 
     private void ensureDefaultDatasourceConfig(DataSourceConfig dsc) {
@@ -318,6 +249,51 @@ public final class EbeanService extends DbService {
             logger.warn("JDBC driver not configured, system automatically set to: " + driver);
         }
         dsc.setDriver(driver);
+    }
+
+    private static final String DRUID_PROVDER = "act.db.ebean.datasource.DruidDataSourceProvider";
+    private static final String HIKARI_PROVIDER = "act.db.ebean.datasource.HikariDataSourceProvider";
+    private DataSourceProvider dataSourceProvider(Map<String, Object> conf) {
+        String dsProvider = (String) conf.get("datasource.provider");
+
+        if (null != dsProvider) {
+            if (dsProvider.toLowerCase().contains("hikari")) {
+                dsProvider = HIKARI_PROVIDER;
+            } else if (dsProvider.toLowerCase().contains("druid")) {
+                dsProvider = DRUID_PROVDER;
+            }
+        }
+        DataSourceProvider provider;
+        if (null != dsProvider) {
+            provider = app().getInstance(dsProvider);
+        } else {
+            // try HikariCP first
+            try {
+                Class.forName("com.zaxxer.hikari.HikariConfig");
+                provider = app().getInstance(HIKARI_PROVIDER);
+            } catch (Exception e) {
+                try {
+                    Class.forName("com.alibaba.druid.pool.DruidDataSource");
+                    provider = app().getInstance(DRUID_PROVDER);
+                } catch (Exception e1) {
+                    // ignore
+                    return null;
+                }
+            }
+        }
+        return provider;
+    }
+
+    private boolean h2DbFileExists(String jdbcUrl) {
+        if (Act.isProd()) {
+            return true;
+        }
+        if (jdbcUrl.startsWith("jdbc:h2:")) {
+            String file = jdbcUrl.substring("jdbc:h2:".length()) + ".mv.db";
+            File _file = new File(file);
+            return (_file.exists());
+        }
+        return false;
     }
 
     public static void registerModelType(Class<?> modelType) {

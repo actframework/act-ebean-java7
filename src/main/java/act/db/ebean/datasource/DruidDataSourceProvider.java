@@ -82,10 +82,9 @@ public class DruidDataSourceProvider extends DataSourceProvider {
     public Map<String, String> confKeyMapping() {
         return C.map("minIdle", "minConnections",
                 "maxActive", "maxConnections",
-                "maxWait", "connectionTimeout",
+                "maxWait", "waitTimeout",
                 "validationQuery", "heartbeatSql",
-                "pstmtCacheSize", "maxPoolPreparedStatementPerConnectionSize"
+                "maxPoolPreparedStatementPerConnectionSize", "pstmtCacheSize"
         );
     }
-
 }

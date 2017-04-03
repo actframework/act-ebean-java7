@@ -59,10 +59,10 @@ public class HikariDataSourceProvider extends DataSourceProvider {
 
     @Override
     public Map<String, String> confKeyMapping() {
-        return C.map("url", "jdbcUrl",
-                "maxConnections", "maximumPoolSize",
+        return C.map("jdbcUrl", "url",
+                "maximumPoolSize", "maxConnections",
                 "minimumIdle", "minConnections",
-                "waitTimeout", "connectionTimeout"
+                "connectionTimeout", "waitTimeout"
         );
     }
 }

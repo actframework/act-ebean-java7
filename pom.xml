@@ -18,6 +18,11 @@
 ********************************************
 *            version history
 ********************************************
+1.1.2
+- #12 Migrate to act-1.1.0 new DB architecture
+1.1.1
+- #10 HikariDataSourceProvider.confKeyMapping error
+- #11 DruidDataSourceProvider.confKeyMapping() error
 1.1.0
 - #9 Support plugin different datasource solution
 - #8 change mysql jdbc driver class name
@@ -64,7 +69,8 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <git.url>git@github.com:actframework/act-ebean.git</git.url>
-    <act.version>1.0.6</act.version>
+    <act.version>1.1.0</act.version>
+    <act-sql-common.version>1.0.0</act-sql-common.version>
     <ebean.version>8.8.1</ebean.version>
     <ebean-agent.version>8.1.1</ebean-agent.version>
     <ebean-agent-loader.version>2.1.2</ebean-agent-loader.version>
@@ -187,6 +193,12 @@
       <artifactId>act</artifactId>
       <version>${act.version}</version>
       <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.actframework</groupId>
+      <artifactId>act-sql-common</artifactId>
+      <version>${act-sql-common.version}</version>
     </dependency>
 
     <dependency>

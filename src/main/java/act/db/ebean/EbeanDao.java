@@ -47,7 +47,7 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
         super(idType, modelType);
         init(modelType);
         this.ebean(service.ebean());
-        this.ds = service.ds();
+        this.ds = service.dataSource();
     }
 
     public EbeanDao(Class<ID_TYPE> id_type, Class<MODEL_TYPE> modelType) {
@@ -130,7 +130,7 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
                 String dbId = null == db ? DbServiceManager.DEFAULT : db.value();
                 EbeanService dbService = getService(dbId, app().dbServiceManager());
                 E.NPE(dbService);
-                ds = dbService.ds();
+                ds = dbService.dataSource();
             }
         }
         return ds;

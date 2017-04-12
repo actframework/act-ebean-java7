@@ -80,6 +80,10 @@ public class EbeanConfigAdaptor {
     }
 
     private NamingConvention namingConvention(SqlDbServiceConfig svcConfig) {
+        if (!svcConfig.rawConf.containsKey("naming.convention")) {
+            // https://github.com/actframework/act-ebean/issues/13
+            return new UnderscoreNamingConvention();
+        }
         //TODO provide more actuate naming convention matching logic
         if (MATCHING == svcConfig.tableNamingConvention) {
             return new MatchingNamingConvention();

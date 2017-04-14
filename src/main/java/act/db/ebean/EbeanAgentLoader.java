@@ -119,7 +119,7 @@ public class EbeanAgentLoader extends AgentLoader {
                             fullName = fullName.substring(1);
                         }
                         loadAgent(fullName, params);
-                        loaded.add(fullName);
+                        loaded.add(agentName);
                         return true;
                     }
                 }

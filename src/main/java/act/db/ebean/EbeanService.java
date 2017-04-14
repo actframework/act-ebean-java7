@@ -58,7 +58,7 @@ public final class EbeanService extends SqlDbService {
     }
 
     @Override
-    protected void configured() {
+    protected void dataSourceInitialized() {
         ebeanConfig = new EbeanConfigAdaptor().adaptFrom(this.config, this);
         app().eventBus().trigger(new EbeanConfigLoaded(ebeanConfig));
         ebean = EbeanServerFactory.create(ebeanConfig);

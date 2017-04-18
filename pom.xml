@@ -18,6 +18,10 @@
 ********************************************
 *            version history
 ********************************************
+1.1.5
+- #16 NPE when no third party datasource configured
+- update sql-common to 1.0.2
+
 1.1.4
 - update to act-sql-common-1.0.1
 - #14 Ebean Agent loaded twice if there are two ebean db services
@@ -75,8 +79,8 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <git.url>git@github.com:actframework/act-ebean.git</git.url>
-    <act.version>1.1.1</act.version>
-    <act-sql-common.version>1.0.1</act-sql-common.version>
+    <act.version>1.1.2</act.version>
+    <act-sql-common.version>1.0.2</act-sql-common.version>
     <ebean.version>8.8.1</ebean.version>
     <ebean-agent.version>8.1.1</ebean-agent.version>
     <ebean-agent-loader.version>2.1.2</ebean-agent-loader.version>

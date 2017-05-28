@@ -7,11 +7,13 @@ import com.avaje.ebean.config.NamingConvention;
 import com.avaje.ebean.config.ServerConfig;
 import com.avaje.ebean.config.UnderscoreNamingConvention;
 import org.avaje.datasource.DataSourceConfig;
+import org.osgl.util.S;
 
 import javax.inject.Singleton;
 import java.util.Properties;
 import java.util.Set;
 
+import static act.app.App.LOGGER;
 import static act.db.sql.util.NamingConvention.Default.MATCHING;
 
 /**
@@ -20,11 +22,11 @@ import static act.db.sql.util.NamingConvention.Default.MATCHING;
 @Singleton
 public class EbeanConfigAdaptor {
 
-    public ServerConfig adaptFrom(SqlDbServiceConfig actConfig, SqlDbService svc) {
+    public ServerConfig adaptFrom(SqlDbServiceConfig actConfig, act.db.sql.DataSourceConfig dsConfig,  SqlDbService svc) {
         ServerConfig config = new ServerConfig();
 
         config.setName(svc.id());
-        config.setDataSourceConfig(adaptFrom(actConfig.dataSourceConfig, svc));
+        config.setDataSourceConfig(adaptFrom(dsConfig, svc));
 
         config.setDdlGenerate(actConfig.ddlGeneratorConfig.create);
         config.setDdlRun(actConfig.ddlGeneratorConfig.create);
@@ -35,12 +37,16 @@ public class EbeanConfigAdaptor {
         Set<Class> modelClasses = svc.modelClasses();
         if (null != modelClasses && !modelClasses.isEmpty()) {
             for (Class modelClass : modelClasses) {
+                if (LOGGER.isTraceEnabled()) {
+                    LOGGER.trace(S.concat("add model class into Ebean config: ", modelClass.getName()));
+                }
                 config.addClass(modelClass);
             }
         }
 
         return config;
     }
+
 
     public DataSourceConfig adaptFrom(act.db.sql.DataSourceConfig actConfig, SqlDbService svc) {
         Properties properties = new Properties();

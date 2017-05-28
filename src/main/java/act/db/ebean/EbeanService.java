@@ -5,6 +5,7 @@ import act.app.App;
 import act.conf.AppConfigKey;
 import act.db.Dao;
 import act.db.ebean.util.EbeanConfigAdaptor;
+import act.db.sql.DataSourceConfig;
 import act.db.sql.SqlDbService;
 import act.event.AppEventListenerBase;
 import com.avaje.ebean.EbeanServer;
@@ -58,8 +59,8 @@ public final class EbeanService extends SqlDbService {
     }
 
     @Override
-    protected void dataSourceProvided(DataSource dataSource) {
-        ebeanConfig = new EbeanConfigAdaptor().adaptFrom(this.config, this);
+    protected void dataSourceProvided(DataSource dataSource, DataSourceConfig dataSourceConfig) {
+        ebeanConfig = new EbeanConfigAdaptor().adaptFrom(this.config, dataSourceConfig, this);
         ebeanConfig.setDataSource(dataSource);
         app().eventBus().trigger(new EbeanConfigLoaded(ebeanConfig));
         ebean = EbeanServerFactory.create(ebeanConfig);
@@ -67,7 +68,7 @@ public final class EbeanService extends SqlDbService {
 
     @Override
     protected DataSource createDataSource() {
-        ebeanConfig = new EbeanConfigAdaptor().adaptFrom(this.config, this);
+        ebeanConfig = new EbeanConfigAdaptor().adaptFrom(this.config, this.config.dataSourceConfig, this);
         app().eventBus().trigger(new EbeanConfigLoaded(ebeanConfig));
         ebean = EbeanServerFactory.create(ebeanConfig);
         return ebeanConfig.getDataSource();
@@ -77,9 +78,13 @@ public final class EbeanService extends SqlDbService {
     protected void releaseResources() {
         if (null != ebean) {
             ebean.shutdown(true, false);
+            if (_logger.isDebugEnabled()) {
+                _logger.debug("ebean shutdown: %s", id());
+            }
             ebean = null;
             ebeanConfig = null;
         }
+        super.releaseResources();
     }
 
     @Override

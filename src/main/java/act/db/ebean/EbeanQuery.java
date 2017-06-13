@@ -290,16 +290,6 @@ public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODE
     }
 
     @Override
-    public void findEach(QueryEachConsumer<MODEL_TYPE> consumer) {
-        q.findEach(consumer);
-    }
-
-    @Override
-    public void findEachWhile(QueryEachWhileConsumer<MODEL_TYPE> consumer) {
-        q.findEachWhile(consumer);
-    }
-
-    @Override
     public List<MODEL_TYPE> findList() {
         return q.findList();
     }
@@ -342,6 +332,16 @@ public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODE
     @Override
     public FutureList<MODEL_TYPE> findFutureList() {
         return q.findFutureList();
+    }
+
+    @Override
+    public void findEach(QueryEachConsumer<MODEL_TYPE> consumer) {
+        q.findEach(consumer);
+    }
+
+    @Override
+    public void findEachWhile(QueryEachWhileConsumer<MODEL_TYPE> consumer) {
+        q.findEachWhile(consumer);
     }
 
     @Override

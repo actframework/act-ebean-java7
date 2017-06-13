@@ -46,7 +46,7 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
     EbeanDao(Class<ID_TYPE> idType, Class<MODEL_TYPE> modelType, EbeanService service) {
         super(idType, modelType);
         init(modelType);
-        this.ebean(service.ebean());
+        this.setEbean(service.ebean());
         this.ds = service.dataSource();
     }
 
@@ -60,8 +60,7 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
     }
 
     public void ebean(EbeanServer ebean) {
-        this.ebean = $.notNull(ebean);
-        this.tableName = ((SpiEbeanServer) ebean).getBeanDescriptor(modelType()).getBaseTable();
+        setEbean($.notNull(ebean));
     }
 
     public void modelType(Class<?> type) {
@@ -92,9 +91,11 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
                 break;
             }
         }
-        if (null != ebean) {
-            this.tableName = ((SpiEbeanServer) ebean).getBeanDescriptor(modelType()).getBaseTable();
-        }
+    }
+
+    private void setEbean(EbeanServer ebean) {
+        this.ebean = ebean;
+        this.tableName = ((SpiEbeanServer) ebean).getBeanDescriptor(modelType()).getBaseTable();
     }
 
     private EbeanService getService(String dbId, DbServiceManager mgr) {
@@ -114,7 +115,7 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
                 String dbId = null == db ? DbServiceManager.DEFAULT : db.value();
                 EbeanService dbService = getService(dbId, app().dbServiceManager());
                 E.NPE(dbService);
-                ebean = dbService.ebean();
+                setEbean(dbService.ebean());
             }
         }
         return ebean;

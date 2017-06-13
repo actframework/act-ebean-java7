@@ -6,7 +6,6 @@ import act.db.Model;
 import org.osgl.$;
 
 import javax.persistence.MappedSuperclass;
-
 @MappedSuperclass
 public abstract class EbeanModelBase <ID_TYPE, MODEL_TYPE extends EbeanModelBase>
         implements Model<ID_TYPE, MODEL_TYPE> {

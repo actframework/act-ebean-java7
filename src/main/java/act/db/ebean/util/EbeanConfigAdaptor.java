@@ -7,13 +7,14 @@ import com.avaje.ebean.config.NamingConvention;
 import com.avaje.ebean.config.ServerConfig;
 import com.avaje.ebean.config.UnderscoreNamingConvention;
 import org.avaje.datasource.DataSourceConfig;
+import org.osgl.logging.LogManager;
+import org.osgl.logging.Logger;
 import org.osgl.util.S;
 
 import javax.inject.Singleton;
 import java.util.Properties;
 import java.util.Set;
 
-import static act.app.App.LOGGER;
 import static act.db.sql.util.NamingConvention.Default.MATCHING;
 
 /**
@@ -21,6 +22,8 @@ import static act.db.sql.util.NamingConvention.Default.MATCHING;
  */
 @Singleton
 public class EbeanConfigAdaptor {
+
+    private static final Logger LOGGER = LogManager.get(EbeanConfigAdaptor.class);
 
     public ServerConfig adaptFrom(SqlDbServiceConfig actConfig, act.db.sql.DataSourceConfig dsConfig,  SqlDbService svc) {
         ServerConfig config = new ServerConfig();

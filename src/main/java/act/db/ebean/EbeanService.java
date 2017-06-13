@@ -12,6 +12,8 @@ import com.avaje.ebean.EbeanServer;
 import com.avaje.ebean.EbeanServerFactory;
 import com.avaje.ebean.config.ServerConfig;
 import org.osgl.$;
+import org.osgl.logging.LogManager;
+import org.osgl.logging.Logger;
 import org.osgl.util.E;
 import org.osgl.util.S;
 
@@ -28,6 +30,8 @@ import static act.app.event.AppEventId.PRE_LOAD_CLASSES;
 
 public final class EbeanService extends SqlDbService {
 
+    private final Logger LOGGER = LogManager.get(EbeanService.class);
+
     // the ebean service instance
     private EbeanServer ebean;
 
@@ -38,7 +42,9 @@ public final class EbeanService extends SqlDbService {
         String s = config.get("agentPackage");
         final String agentPackage = null == s ? S.string(app().config().get(AppConfigKey.SCAN_PACKAGE)) : S.string(s).trim();
         E.invalidConfigurationIf(S.blank(agentPackage), "\"agentPackage\" not configured");
-        _logger.info("\"agentPackage\" configured: %s", agentPackage);
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("\"agentPackage\" configured: %s", agentPackage);
+        }
         app.eventBus().bind(PRE_LOAD_CLASSES, new AppEventListenerBase(S.concat(dbId, "-ebean-pre-cl")) {
             @Override
             public void on(EventObject event) {
@@ -47,7 +53,7 @@ public final class EbeanService extends SqlDbService {
                         .append(agentPackage)
                         .toString();
                 if (!EbeanAgentLoader.loadAgentFromClasspath("ebean-agent", s)) {
-                    _logger.warn("ebean-agent not found in classpath - not dynamically loaded");
+                    LOGGER.warn("ebean-agent not found in classpath - not dynamically loaded");
                 }
             }
         });
@@ -59,8 +65,8 @@ public final class EbeanService extends SqlDbService {
     }
 
     @Override
-    protected void dataSourceProvided(DataSource dataSource, DataSourceConfig dataSourceConfig) {
-        ebeanConfig = new EbeanConfigAdaptor().adaptFrom(this.config, dataSourceConfig, this);
+    protected void dataSourceProvided(DataSource dataSource, DataSourceConfig dsConfig) {
+        ebeanConfig = new EbeanConfigAdaptor().adaptFrom(this.config, dsConfig, this);
         ebeanConfig.setDataSource(dataSource);
         app().eventBus().trigger(new EbeanConfigLoaded(ebeanConfig));
         ebean = EbeanServerFactory.create(ebeanConfig);

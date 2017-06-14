@@ -18,6 +18,9 @@
 ********************************************
 *            version history
 ********************************************
+1.2.1
+* catch up to ebean2-1.1.1
+
 1.2.0
 * catch up to act-1.4.0
 * catch up to act-sql-common to 1.1.0

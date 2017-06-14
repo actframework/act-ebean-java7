@@ -316,6 +316,10 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
         return q();
     }
 
+    boolean ebeanServerProvided() {
+        return null != ebean;
+    }
+
     private enum R2 {
         betweenProperties() {
             @Override

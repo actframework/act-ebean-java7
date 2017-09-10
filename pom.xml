@@ -21,7 +21,7 @@
   <groupId>org.actframework</groupId>
   <artifactId>act-ebean</artifactId>
   <packaging>jar</packaging>
-  <version>1.2.3-SNAPSHOT</version>
+  <version>1.2.3</version>
 
   <name>ACT Ebean</name>
   <description>Provides SQL database access through Ebean ORM library (java 7+)</description>

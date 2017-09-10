@@ -24,7 +24,7 @@
   <version>1.2.3-SNAPSHOT</version>
 
   <name>ACT Ebean</name>
-  <description>Provides SQL database access through Ebean ORM library (Java 8+)</description>
+  <description>Provides SQL database access through Ebean ORM library (java 7+)</description>
   <url>http://actframework.org/plugin/ebean</url>
   <inceptionYear>2015</inceptionYear>
 

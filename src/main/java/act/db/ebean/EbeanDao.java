@@ -1,5 +1,27 @@
 package act.db.ebean;
 
+/*-
+ * #%L
+ * ACT Ebean
+ * %%
+ * Copyright (C) 2015 - 2017 ActFramework
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+import static act.Act.app;
+
 import act.app.DbServiceManager;
 import act.db.DB;
 import act.db.DaoBase;
@@ -16,15 +38,13 @@ import org.osgl.util.C;
 import org.osgl.util.E;
 import org.osgl.util.S;
 
-import javax.persistence.Id;
-import javax.sql.DataSource;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-
-import static act.Act.app;
+import javax.persistence.Id;
+import javax.sql.DataSource;
 
 @General
 @NoBind
@@ -511,6 +531,7 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
                 break;
             case 3:
                 R2.valueOf(sa[2]).applyTo(where, sa[0], sa[1], val);
+                break;
             default:
                 throw E.unexpected("Unknown where expression: %s", key);
         }

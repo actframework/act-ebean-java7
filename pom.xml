@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2013 The Morphia/MongoDB Plugin for ACT Framework
+  ~ Copyright 2013 The Ebean Plugin for ACT Framework
   ~
   ~ The ACT framework Project licenses this file to you under the Apache License,
   ~ version 2.0 (the "License"); you may not use this file except in compliance
@@ -14,75 +14,6 @@
   ~ License for the specific language governing permissions and limitations
   ~ under the License.
   -->
-<!--
-********************************************
-*            version history
-********************************************
-1.2.2
-* catch up to sql-common-1.1.1
-
-1.2.1
-* catch up to ebean2-1.1.1
-
-1.2.0
-* catch up to act-1.4.0
-* catch up to act-sql-common to 1.1.0
-
-1.1.5
-- #16 NPE when no third party datasource configured
-- update sql-common to 1.0.2
-
-1.1.4
-- update to act-sql-common-1.0.1
-- #14 Ebean Agent loaded twice if there are two ebean db services
-- #15 The datasource created in sql-common not used when creating ebean server
-
-1.1.3
-- #13 It should use ebean's naming convention by default
-
-1.1.2
-- #12 Migrate to act-1.1.0 new DB architecture
-
-1.1.1
-- #10 HikariDataSourceProvider.confKeyMapping error
-- #11 DruidDataSourceProvider.confKeyMapping() error
-
-1.1.0
-- #9 Support plugin different datasource solution
-- #8 change mysql jdbc driver class name
-- #6 Support Druid database
-
-1.0.5
-- fix #7 It reports XXX table not found when start app in dev mode
-
-1.0.4
-- take out version range from pom.xml. See https://issues.apache.org/jira/browse/MNG-3092
-
-1.0.3
-- version number of mistake
-
-1.0.2
-- #4 use HikariCP for connection pool
-- #5 Make it easy to do low level JDBC logic
-
-1.0.1
-- Fix #1 EbeanDao.drop() method cause JdbcSQLException
-- Fix #3 EbeanInjectionListener not effect on User defined Dao
-
-1.0.0
-- the first formal release
-
-0.7.0 - update act to 0.7.0
-0.6.0 - update act to 0.6.0
-0.5.0 - upgrade to act 0.5.0 (to reserve 0.4.0 for techempower test)
-0.4.0 - upgrade to act 0.4.0
-0.3.1 - upgrade to act 0.3.1
-0.3.0 - upgrade to act 0.3.0
-0.2.0 - upgrade to act 0.2.0
-      - upgrade to ebean-8
-0.1.2 - upgrade to act 0.1.2
-0.1.1 - baseline version
--->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
@@ -93,20 +24,14 @@
   <version>1.2.3-SNAPSHOT</version>
 
   <name>ACT Ebean</name>
-  <description>The Ebean Plugin for Actframework SQL database access</description>
+  <description>Provides SQL database access through Ebean ORM library (Java 8+)</description>
   <url>http://actframework.org/plugin/ebean</url>
+  <inceptionYear>2015</inceptionYear>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <git.url>git@github.com:actframework/act-ebean.git</git.url>
-    <act.version>1.4.1</act.version>
-    <act-sql-common.version>1.1.1</act-sql-common.version>
-    <ebean.version>8.8.1</ebean.version>
-    <ebean-agent.version>8.1.1</ebean-agent.version>
-    <ebean-agent-loader.version>2.1.2</ebean-agent-loader.version>
-    <mockito-core.version>2.7.0</mockito-core.version>
-  </properties>
+  <organization>
+    <name>ActFramework</name>
+    <url>http://actframework.org</url>
+  </organization>
 
   <parent>
     <groupId>org.sonatype.oss</groupId>
@@ -114,10 +39,42 @@
     <version>7</version>
   </parent>
 
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
+    <scm.url>git@github.com:actframework/act-ebean.git</scm.url>
+
+    <maven-checkstyle-plugin.version>2.17</maven-checkstyle-plugin.version>
+    <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
+    <maven-javadoc-plugin.version>3.0.0-M1</maven-javadoc-plugin.version>
+    <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
+
+    <buildnumber-maven-plugin.version>1.4</buildnumber-maven-plugin.version>
+    <checkstyle.version>8.1</checkstyle.version>
+    <cobertura-maven-plugin.version>2.7</cobertura-maven-plugin.version>
+    <errorpone-core.version>2.1.1</errorpone-core.version>
+    <license-maven-plugin.version>1.13</license-maven-plugin.version>
+    <markdown-doclet.version>1.4</markdown-doclet.version>
+    <plexus-compiler-javac-errorprone.version>2.8.2</plexus-compiler-javac-errorprone.version>
+
+    <osgl-bootstrap.version>1.0.0-BETA-7</osgl-bootstrap.version>
+    <osgl-ut.version>1.0.0-BETA-4</osgl-ut.version>
+
+    <ebean.version>8.8.1</ebean.version>
+    <ebean-agent.version>8.1.1</ebean-agent.version>
+    <ebean-agent-loader.version>2.1.2</ebean-agent-loader.version>
+
+    <act.version>1.4.11</act.version>
+    <act-sql-common.version>1.1.2</act-sql-common.version>
+
+  </properties>
+
   <scm>
-    <connection>scm:git:${git.url}</connection>
-    <developerConnection>scm:git:${git.url}</developerConnection>
-    <url>${git.url}</url>
+    <connection>scm:git:${scm.url}</connection>
+    <developerConnection>scm:git:${scm.url}</developerConnection>
+    <url>${scm.url}</url>
   </scm>
 
   <licenses>
@@ -136,66 +93,137 @@
       </resource>
     </resources>
 
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.3</version>
-          <configuration>
-            <source>1.7</source>
-            <target>1.7</target>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-source-plugin</artifactId>
-          <version>2.1.2</version>
-          <configuration>
-            <includePom>true</includePom>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-javadoc-plugin</artifactId>
-          <version>2.9</version>
-          <configuration>
-            <stylesheetfile>src/etc/javadoc.css</stylesheetfile>
-            <quiet />
-          </configuration>
-          <executions>
-            <execution>
-              <id>gen-javadoc</id>
-              <phase>prepare-package</phase>
-              <goals>
-                <goal>javadoc</goal>
-              </goals>
-            </execution>
-            <execution>
-              <id>attach-javadocs</id>
-              <goals>
-                <goal>jar</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-      </plugins>
-    </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven-compiler-plugin.version}</version>
+        <configuration>
+          <compilerId>javac-with-errorprone</compilerId>
+          <forceJavacCompilerUse>true</forceJavacCompilerUse>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-compiler-javac-errorprone</artifactId>
+            <version>${plexus-compiler-javac-errorprone.version}</version>
+          </dependency>
+          <!-- override plexus-compiler-javac-errorprone's dependency on
+               Error Prone with the latest version -->
+          <dependency>
+            <groupId>com.google.errorprone</groupId>
+            <artifactId>error_prone_core</artifactId>
+            <version>${errorpone-core.version}</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>cobertura-maven-plugin</artifactId>
+        <version>${cobertura-maven-plugin.version}</version>
+        <configuration>
+          <formats>
+            <format>html</format>
+            <format>xml</format>
+          </formats>
+          <check />
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>${maven-checkstyle-plugin.version}</version>
+        <dependencies>
+          <dependency>
+            <groupId>com.puppycrawl.tools</groupId>
+            <artifactId>checkstyle</artifactId>
+            <version>${checkstyle.version}</version>
+          </dependency>
+        </dependencies>
+        <configuration>
+          <failOnViolation>true</failOnViolation>
+          <configLocation>checkstyle.xml</configLocation>
+          <encoding>UTF-8</encoding>
+          <consoleOutput>true</consoleOutput>
+          <failsOnError>true</failsOnError>
+        </configuration>
+        <executions>
+          <execution>
+            <id>checkstyle</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <version>${license-maven-plugin.version}</version>
+        <configuration>
+          <licenseName>apache_v2</licenseName>
+          <verbose>false</verbose>
+        </configuration>
+        <executions>
+          <execution>
+            <id>first</id>
+            <goals>
+              <goal>update-file-header</goal>
+            </goals>
+            <phase>process-sources</phase>
+            <configuration>
+              <roots>
+                <root>src/main/java</root>
+                <root>src/test/java</root>
+              </roots>
+              <excludes>
+                <exclude>**/README</exclude>
+                <exclude>src/test/resources/**</exclude>
+                <exclude>src/main/resources/**</exclude>
+              </excludes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>buildnumber-maven-plugin</artifactId>
+        <version>${buildnumber-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <phase>validate</phase>
+            <goals>
+              <goal>create</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <shortRevisionLength>4</shortRevisionLength>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>${maven-source-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
   </build>
 
   <dependencies>
 
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.10</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <version>${mockito-core.version}</version>
+      <groupId>org.osgl</groupId>
+      <artifactId>osgl-ut</artifactId>
+      <version>${osgl-ut.version}</version>
       <scope>test</scope>
     </dependency>
 
@@ -219,67 +247,57 @@
 
     <dependency>
       <groupId>org.actframework</groupId>
-      <artifactId>act</artifactId>
-      <version>${act.version}</version>
-      <scope>provided</scope>
+      <artifactId>act-sql-common</artifactId>
+      <version>${act-sql-common.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.actframework</groupId>
-      <artifactId>act-sql-common</artifactId>
-      <version>${act-sql-common.version}</version>
+      <artifactId>act</artifactId>
+      <version>${act.version}</version>
+      <scope>provided</scope>
     </dependency>
 
   </dependencies>
 
   <profiles>
     <profile>
-      <id>dist</id>
+      <id>release</id>
       <build>
         <plugins>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-assembly-plugin</artifactId>
-            <version>2.2</version>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>${maven-javadoc-plugin.version}</version>
             <configuration>
-              <descriptors>
-                <descriptor>${basedir}/assembly-dist.xml</descriptor>
-              </descriptors>
-              <tarLongFileMode>gnu</tarLongFileMode>
+              <stylesheetfile>src/etc/javadoc.css</stylesheetfile>
+              <doclet>ch.raffael.mddoclet.MarkdownDoclet</doclet>
+              <docletArtifact>
+                <groupId>ch.raffael.markdown-doclet</groupId>
+                <artifactId>markdown-doclet</artifactId>
+                <version>${markdown-doclet.version}</version>
+              </docletArtifact>
+              <useStandardDocletOptions>true</useStandardDocletOptions>
+              <links>
+                <link>http://javax-inject.github.io/javax-inject/api/</link>
+                <link>https://docs.oracle.com/javaee/7/api/</link>
+              </links>
             </configuration>
             <executions>
               <execution>
-                <id>make-assembly</id>
-                <phase>package</phase>
+                <id>gen-javadoc</id>
+                <phase>prepare-package</phase>
                 <goals>
-                  <goal>single</goal>
+                  <goal>javadoc</goal>
                 </goals>
-                <configuration>
-                  <descriptors>
-                    <descriptor>${basedir}/assembly-dist.xml</descriptor>
-                  </descriptors>
-                </configuration>
               </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-source-plugin</artifactId>
-            <executions>
               <execution>
-                <id>attach-sources</id>
+                <id>attach-javadocs</id>
                 <goals>
                   <goal>jar</goal>
                 </goals>
               </execution>
             </executions>
-          </plugin>
-          <plugin>
-            <groupId>com.mycila.maven-license-plugin</groupId>
-            <artifactId>maven-license-plugin</artifactId>
-            <configuration>
-              <header>src/etc/header.txt</header>
-            </configuration>
           </plugin>
         </plugins>
       </build>

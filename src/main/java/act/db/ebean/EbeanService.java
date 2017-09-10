@@ -1,5 +1,27 @@
 package act.db.ebean;
 
+/*-
+ * #%L
+ * ACT Ebean
+ * %%
+ * Copyright (C) 2015 - 2017 ActFramework
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+import static act.app.event.AppEventId.PRE_LOAD_CLASSES;
+
 import act.Act;
 import act.app.App;
 import act.conf.AppConfigKey;
@@ -12,25 +34,22 @@ import com.avaje.ebean.EbeanServer;
 import com.avaje.ebean.EbeanServerFactory;
 import com.avaje.ebean.config.ServerConfig;
 import org.osgl.$;
-import org.osgl.logging.LogManager;
-import org.osgl.logging.Logger;
+import org.osgl.bootstrap.Version;
 import org.osgl.util.E;
 import org.osgl.util.S;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.sql.DataSource;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.EventObject;
 import java.util.Map;
-
-import static act.app.event.AppEventId.PRE_LOAD_CLASSES;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.sql.DataSource;
 
 public final class EbeanService extends SqlDbService {
 
-    private final Logger LOGGER = LogManager.get(EbeanService.class);
+    public static final Version VERSION = EbeanPlugin.VERSION;
 
     // the ebean service instance
     private EbeanServer ebean;
@@ -42,8 +61,8 @@ public final class EbeanService extends SqlDbService {
         String s = config.get("agentPackage");
         final String agentPackage = null == s ? S.string(app().config().get(AppConfigKey.SCAN_PACKAGE)) : S.string(s).trim();
         E.invalidConfigurationIf(S.blank(agentPackage), "\"agentPackage\" not configured");
-        if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("\"agentPackage\" configured: %s", agentPackage);
+        if (isTraceEnabled()) {
+            trace("\"agentPackage\" configured: %s", agentPackage);
         }
         app.eventBus().bind(PRE_LOAD_CLASSES, new AppEventListenerBase(S.concat(dbId, "-ebean-pre-cl")) {
             @Override
@@ -53,7 +72,7 @@ public final class EbeanService extends SqlDbService {
                         .append(agentPackage)
                         .toString();
                 if (!EbeanAgentLoader.loadAgentFromClasspath("ebean-agent", s)) {
-                    LOGGER.warn("ebean-agent not found in classpath - not dynamically loaded");
+                    warn("ebean-agent not found in classpath - not dynamically loaded");
                 }
             }
         });
@@ -84,8 +103,8 @@ public final class EbeanService extends SqlDbService {
     protected void releaseResources() {
         if (null != ebean) {
             ebean.shutdown(true, false);
-            if (_logger.isDebugEnabled()) {
-                _logger.debug("ebean shutdown: %s", id());
+            if (isDebugEnabled()) {
+                debug("ebean shutdown: %s", id());
             }
             ebean = null;
             ebeanConfig = null;

@@ -196,6 +196,16 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
     }
 
     @Override
+    public MODEL_TYPE findLatest() {
+        throw E.unsupport();
+    }
+
+    @Override
+    public MODEL_TYPE findLastModified() {
+        throw E.unsupport();
+    }
+
+    @Override
     public MODEL_TYPE reload(MODEL_TYPE entity) {
         ebean().refresh(entity);
         return entity;

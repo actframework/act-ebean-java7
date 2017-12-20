@@ -34,9 +34,9 @@ import com.avaje.ebean.EbeanServer;
 import com.avaje.ebean.EbeanServerFactory;
 import com.avaje.ebean.config.ServerConfig;
 import org.osgl.$;
-import org.osgl.bootstrap.Version;
 import org.osgl.util.E;
 import org.osgl.util.S;
+import osgl.version.Version;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;

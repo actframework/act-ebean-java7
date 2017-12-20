@@ -24,7 +24,7 @@ import act.app.App;
 import act.db.DbPlugin;
 import act.db.DbService;
 import act.inject.param.ParamValueLoaderService;
-import org.osgl.bootstrap.Version;
+import osgl.version.Version;
 
 import java.util.Map;
 

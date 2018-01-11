@@ -20,7 +20,10 @@ package act.db.ebean;
  * #L%
  */
 
+import static act.app.event.AppEventId.DEPENDENCY_INJECTOR_PROVISIONED;
+
 import act.event.ActEvent;
+import act.event.BindOn;
 import com.avaje.ebean.config.ServerConfig;
 
 /**
@@ -30,6 +33,7 @@ import com.avaje.ebean.config.ServerConfig;
  * Application can use this event to do further configuration on
  * {@link ServerConfig}
  */
+@BindOn(DEPENDENCY_INJECTOR_PROVISIONED)
 public class EbeanConfigLoaded extends ActEvent<ServerConfig> {
     public EbeanConfigLoaded(ServerConfig source) {
         super(source);

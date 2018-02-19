@@ -22,10 +22,10 @@ package act.db.ebean;
 
 import act.Act;
 import act.app.App;
-import act.app.event.AppEventId;
+import act.app.event.SysEventId;
 import act.db.DbService;
 import act.db.di.DaoInjectionListenerBase;
-import act.event.AppEventListenerBase;
+import act.event.SysEventListenerBase;
 import org.osgl.$;
 import org.osgl.inject.BeanSpec;
 import org.osgl.util.Generics;
@@ -59,7 +59,7 @@ public class EbeanDaoInjectionListener extends DaoInjectionListenerBase {
         DbService dbService = App.instance().dbServiceManager().dbService(resolved._2);
         if (dbService instanceof EbeanService) {
             final EbeanService service = $.cast(dbService);
-            Act.eventBus().bind(AppEventId.DB_SVC_LOADED, new AppEventListenerBase() {
+            Act.eventBus().bind(SysEventId.DB_SVC_LOADED, new SysEventListenerBase() {
                 @Override
                 public void on(EventObject eventObject) throws Exception {
                     dao.ebean(service.ebean());

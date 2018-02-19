@@ -21,7 +21,7 @@ package act.db.ebean;
  */
 
 import act.Act;
-import act.app.event.AppEventId;
+import act.app.event.SysEventId;
 import act.sys.Env;
 import com.sun.tools.attach.AttachNotSupportedException;
 import com.sun.tools.attach.VirtualMachine;
@@ -103,7 +103,7 @@ public class EbeanAgentLoader extends AgentLoader {
                 }
             } finally {
                 // ensure ebean2 EnhanceContext logout set to dump output
-                Act.jobManager().on(AppEventId.CLASS_LOADER_INITIALIZED, new Runnable() {
+                Act.jobManager().on(SysEventId.CLASS_LOADER_INITIALIZED, new Runnable() {
                     @Override
                     public void run() {
                         System.setOut(ps);

@@ -20,6 +20,8 @@ package act.db.ebean.util;
  * #L%
  */
 
+import static act.db.sql.util.NamingConvention.Default.MATCHING;
+
 import act.db.sql.SqlDbService;
 import act.db.sql.SqlDbServiceConfig;
 import com.avaje.ebean.config.MatchingNamingConvention;
@@ -31,11 +33,9 @@ import org.osgl.logging.LogManager;
 import org.osgl.logging.Logger;
 import org.osgl.util.S;
 
-import javax.inject.Singleton;
 import java.util.Properties;
 import java.util.Set;
-
-import static act.db.sql.util.NamingConvention.Default.MATCHING;
+import javax.inject.Singleton;
 
 /**
  * Adapt {@link act.db.sql.SqlDbServiceConfig} to {@link ServerConfig}
@@ -57,7 +57,7 @@ public class EbeanConfigAdaptor {
 
         config.setNamingConvention(namingConvention(actConfig));
 
-        Set<Class> modelClasses = svc.modelClasses();
+        Set<Class> modelClasses = svc.entityClasses();
         if (null != modelClasses && !modelClasses.isEmpty()) {
             for (Class modelClass : modelClasses) {
                 if (LOGGER.isTraceEnabled()) {

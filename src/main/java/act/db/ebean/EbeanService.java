@@ -20,7 +20,7 @@ package act.db.ebean;
  * #L%
  */
 
-import static act.app.event.AppEventId.PRE_LOAD_CLASSES;
+import static act.app.event.SysEventId.PRE_LOAD_CLASSES;
 
 import act.Act;
 import act.app.App;
@@ -29,7 +29,7 @@ import act.db.Dao;
 import act.db.ebean.util.EbeanConfigAdaptor;
 import act.db.sql.DataSourceConfig;
 import act.db.sql.SqlDbService;
-import act.event.AppEventListenerBase;
+import act.event.SysEventListenerBase;
 import com.avaje.ebean.EbeanServer;
 import com.avaje.ebean.EbeanServerFactory;
 import com.avaje.ebean.config.ServerConfig;
@@ -37,6 +37,7 @@ import org.osgl.$;
 import org.osgl.util.E;
 import org.osgl.util.S;
 import osgl.version.Version;
+import osgl.version.Versioned;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
@@ -47,6 +48,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.sql.DataSource;
 
+@Versioned
 public final class EbeanService extends SqlDbService {
 
     public static final Version VERSION = EbeanPlugin.VERSION;
@@ -64,7 +66,7 @@ public final class EbeanService extends SqlDbService {
         if (isTraceEnabled()) {
             trace("\"agentPackage\" configured: %s", agentPackage);
         }
-        app.eventBus().bind(PRE_LOAD_CLASSES, new AppEventListenerBase(S.concat(dbId, "-ebean-pre-cl")) {
+        app.eventBus().bind(PRE_LOAD_CLASSES, new SysEventListenerBase(S.concat(dbId, "-ebean-pre-cl")) {
             @Override
             public void on(EventObject event) {
                 String s = S.buffer("debug=").append(Act.isDev() ? "1" : "0")

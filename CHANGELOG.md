@@ -1,5 +1,9 @@
 # act-ebean CHANGE LOG
 
+1.4.0 - 19/Feb/2018
+* update to act-1.7.0
+* update to act-sql-common-1.3.0
+
 1.3.2 - 23/Jan/2018
 * update to act-1.6.5
 * update act-sql-common to 1.2.1

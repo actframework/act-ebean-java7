@@ -1,5 +1,9 @@
 # act-ebean CHANGE LOG
 
+1.5.0
+* update to act-1.8.0
+* catch ebean2 change: Support act timestamp annotation #19
+
 1.4.0 - 19/Feb/2018
 * update to act-1.7.0
 * update to act-sql-common-1.3.0

@@ -1,4 +1,13 @@
-# act-ebean CHANGE LOG
+# act-ebean-java7 CHANGE LOG
+
+1.5.2 - 25/Mar/2018
+* rename to act-ebean-java7
+* update act to 1.8.2
+* update act-sql-common to 1.3.2
+
+------------------------------------
+
+Previous named act-ebean
 
 1.5.1 - 11/Mar/2018
 * update to act-1.8.1

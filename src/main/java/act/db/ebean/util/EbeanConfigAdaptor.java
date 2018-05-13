@@ -67,6 +67,7 @@ public class EbeanConfigAdaptor {
             }
         }
 
+        config.setDisableClasspathSearch(true);
         return config;
     }
 

@@ -1,5 +1,11 @@
 # act-ebean-java7 CHANGE LOG
 
+1.6.0 - 13/May/2018
+* update act to 1.8.8-RC4
+* Disable Ebean classpath search #21
+* Register global mapping filter to avoid copying ebean enhanced fields #20
+
+
 1.5.3 - 02/Apr/2018
 * update act to 1.8.5
 * update act-sql-common to 1.3.3

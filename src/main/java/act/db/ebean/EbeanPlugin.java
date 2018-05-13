@@ -33,6 +33,7 @@ import act.inject.param.ParamValueLoaderService;
 import com.avaje.ebean.TxScope;
 import com.avaje.ebeaninternal.api.HelpScopeTrans;
 import com.avaje.ebeaninternal.api.ScopeTrans;
+import org.osgl.OsglConfig;
 import osgl.version.Version;
 
 import java.util.EventObject;
@@ -43,6 +44,12 @@ public class EbeanPlugin extends DbPlugin {
     public static final Version VERSION = Version.of(EbeanPlugin.class);
 
     private static final ThreadLocal<ScopeTrans> txHolder = new ThreadLocal<>();
+
+    @Override
+    public void register() {
+        super.register();
+        registerGlobalMappingFilter();
+    }
 
     @Override
     protected void applyTo(App app) {
@@ -83,4 +90,9 @@ public class EbeanPlugin extends DbPlugin {
 
         return new EbeanService(id, app, conf);
     }
+
+    private void registerGlobalMappingFilter() {
+        OsglConfig.addGlobalMappingFilter("starts:_ebean_");
+    }
+
 }

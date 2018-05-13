@@ -20,7 +20,7 @@
 
   <artifactId>act-ebean-java7</artifactId>
   <packaging>jar</packaging>
-  <version>1.6.0-SNAPSHOT</version>
+  <version>1.6.0</version>
 
   <name>ACT Ebean</name>
   <description>Provides SQL database access through Ebean ORM library (java 7+)</description>

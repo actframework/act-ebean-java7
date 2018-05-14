@@ -61,7 +61,8 @@ public final class EbeanService extends SqlDbService {
     public EbeanService(final String dbId, final App app, final Map<String, String> config) {
         super(dbId, app, config);
         String s = config.get("agentPackage");
-        final String agentPackage = null == s ? S.string(app().config().get(AppConfigKey.SCAN_PACKAGE, null)) : S.string(s).trim();
+        String scanPackage = app().config().get(AppConfigKey.SCAN_PACKAGE, null);
+        final String agentPackage = null == s ? scanPackage : S.string(s).trim();
         E.invalidConfigurationIf(S.blank(agentPackage), "\"agentPackage\" not configured");
         if (isTraceEnabled()) {
             trace("\"agentPackage\" configured: %s", agentPackage);

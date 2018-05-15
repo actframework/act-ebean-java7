@@ -1,7 +1,7 @@
 # act-ebean-java7 CHANGE LOG
 
 1.6.1 - 14/May/2018
-* java.lang.ClassCastException: java.lang.String cannot be cast to [C #22
+* catch act-ebean 1.6.5 changes
 
 1.6.0 - 13/May/2018
 * update act to 1.8.8-RC4

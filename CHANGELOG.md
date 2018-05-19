@@ -1,7 +1,10 @@
 # act-ebean-java7 CHANGE LOG
 
+1.6.2 - 19/May/2018
+* catch up act-ebean 1.6.5 changes
+
 1.6.1 - 14/May/2018
-* catch act-ebean 1.6.5 changes
+* catch act-ebean 1.6.4 changes
 
 1.6.0 - 13/May/2018
 * update act to 1.8.8-RC4

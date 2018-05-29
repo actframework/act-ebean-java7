@@ -27,11 +27,17 @@ import act.app.App;
 import act.conf.AppConfigKey;
 import act.db.Dao;
 import act.db.ebean.util.EbeanConfigAdaptor;
+import act.db.ebean.util.EbeanDataSourceProvider;
+import act.db.ebean.util.EbeanDataSourceWrapper;
 import act.db.sql.DataSourceConfig;
+import act.db.sql.DataSourceProvider;
 import act.db.sql.SqlDbService;
+import act.db.sql.tx.TxContext;
 import act.event.SysEventListenerBase;
 import com.avaje.ebean.EbeanServer;
 import com.avaje.ebean.EbeanServerFactory;
+import com.avaje.ebean.Transaction;
+import com.avaje.ebean.TxScope;
 import com.avaje.ebean.config.ServerConfig;
 import org.osgl.$;
 import org.osgl.util.E;
@@ -56,7 +62,8 @@ public final class EbeanService extends SqlDbService {
     // the ebean service instance
     private EbeanServer ebean;
 
-    private ServerConfig ebeanConfig;
+    // the ebean service instance for readonly operations
+    private EbeanServer ebeanReadOnly;
 
     public EbeanService(final String dbId, final App app, final Map<String, String> config) {
         super(dbId, app, config);
@@ -87,30 +94,46 @@ public final class EbeanService extends SqlDbService {
     }
 
     @Override
-    protected void dataSourceProvided(DataSource dataSource, DataSourceConfig dsConfig) {
-        ebeanConfig = new EbeanConfigAdaptor().adaptFrom(this.config, dsConfig, this);
-        ebeanConfig.setDataSource(dataSource);
+    protected void dataSourceProvided(DataSource dataSource, DataSourceConfig dsConfig, boolean readonly) {
+        ServerConfig ebeanConfig;
+        if (dataSource instanceof EbeanDataSourceWrapper) {
+            EbeanDataSourceWrapper wrapper = (EbeanDataSourceWrapper) dataSource;
+            ebeanConfig = wrapper.ebeanConfig;
+        } else {
+            ebeanConfig = new EbeanConfigAdaptor().adaptFrom(this.config, dsConfig, this);
+            ebeanConfig.setDataSource(dataSource);
+        }
         app().eventBus().trigger(new EbeanConfigLoaded(ebeanConfig));
-        ebean = EbeanServerFactory.create(ebeanConfig);
+        if (readonly) {
+            ebeanReadOnly = EbeanServerFactory.create(ebeanConfig);
+        } else {
+            ebean = EbeanServerFactory.create(ebeanConfig);
+            if (null == ebeanReadOnly) {
+                ebeanReadOnly = ebean;
+            }
+        }
     }
 
     @Override
-    protected DataSource createDataSource() {
-        ebeanConfig = new EbeanConfigAdaptor().adaptFrom(this.config, this.config.dataSourceConfig, this);
-        app().eventBus().trigger(new EbeanConfigLoaded(ebeanConfig));
-        ebean = EbeanServerFactory.create(ebeanConfig);
-        return ebeanConfig.getDataSource();
+    protected DataSourceProvider builtInDataSourceProvider() {
+        return new EbeanDataSourceProvider(config, this);
     }
 
     @Override
     protected void releaseResources() {
         if (null != ebean) {
             ebean.shutdown(true, false);
-            if (isDebugEnabled()) {
-                debug("ebean shutdown: %s", id());
+            if (logger.isDebugEnabled()) {
+                logger.debug("ebean shutdown: %s", id());
             }
             ebean = null;
-            ebeanConfig = null;
+        }
+        if (null != ebeanReadOnly) {
+            ebeanReadOnly.shutdown(true, false);
+            if (logger.isDebugEnabled()) {
+                logger.debug("ebean readonly shutdown: %s", id());
+            }
+            ebeanReadOnly = null;
         }
         super.releaseResources();
     }
@@ -133,7 +156,7 @@ public final class EbeanService extends SqlDbService {
     public <DAO extends Dao> DAO newDaoInstance(Class<DAO> daoType) {
         E.illegalArgumentIf(!EbeanDao.class.isAssignableFrom(daoType), "expected EbeanDao, found: %s", daoType);
         EbeanDao dao = $.cast(app().getInstance(daoType));
-        dao.ebean(this.ebean());
+        dao.dbService(this);
         return (DAO) dao;
     }
 
@@ -142,8 +165,53 @@ public final class EbeanService extends SqlDbService {
         return Entity.class;
     }
 
+    @Override
+    protected void doStartTx(Object delegate, boolean readOnly) {
+        if (readOnly) {
+            TxScope scope = TxScope.required().setReadOnly(true);
+            ebeanReadOnly.beginTransaction(scope);
+        } else {
+            ebean.beginTransaction();
+        }
+    }
+
+    @Override
+    protected void doRollbackTx(Object delegate, Throwable cause) {
+        Transaction tx = ebean.currentTransaction();
+        if (null == tx) {
+            return;
+        }
+        if (TxContext.readOnly()) {
+            ebeanReadOnly.endTransaction();
+        } else {
+            logger.warn(cause, "Roll back transaction");
+            ebean.rollbackTransaction();
+        }
+    }
+
+    @Override
+    protected void doEndTxIfActive(Object delegate) {
+        Transaction tx = ebean.currentTransaction();
+        if (null == tx) {
+            return;
+        }
+        if (TxContext.readOnly()) {
+            ebeanReadOnly.endTransaction();
+        } else {
+            ebean.commitTransaction();
+        }
+    }
+
+    public EbeanServer ebean(boolean readOnly) {
+        return readOnly ? ebeanReadOnly : ebean;
+    }
+
     public EbeanServer ebean() {
         return ebean;
+    }
+
+    public EbeanServer ebeanReadOnly() {
+        return ebeanReadOnly;
     }
 
 }

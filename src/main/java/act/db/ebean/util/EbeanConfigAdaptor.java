@@ -24,15 +24,15 @@ import static act.db.sql.util.NamingConvention.Default.MATCHING;
 
 import act.db.sql.SqlDbService;
 import act.db.sql.SqlDbServiceConfig;
+import act.util.LogSupport;
 import com.avaje.ebean.config.MatchingNamingConvention;
 import com.avaje.ebean.config.NamingConvention;
 import com.avaje.ebean.config.ServerConfig;
 import com.avaje.ebean.config.UnderscoreNamingConvention;
 import org.avaje.datasource.DataSourceConfig;
-import org.osgl.logging.LogManager;
-import org.osgl.logging.Logger;
 import org.osgl.util.S;
 
+import java.sql.Connection;
 import java.util.Properties;
 import java.util.Set;
 import javax.inject.Singleton;
@@ -41,9 +41,7 @@ import javax.inject.Singleton;
  * Adapt {@link act.db.sql.SqlDbServiceConfig} to {@link ServerConfig}
  */
 @Singleton
-public class EbeanConfigAdaptor {
-
-    private static final Logger LOGGER = LogManager.get(EbeanConfigAdaptor.class);
+public class EbeanConfigAdaptor extends LogSupport {
 
     public ServerConfig adaptFrom(SqlDbServiceConfig actConfig, act.db.sql.DataSourceConfig dsConfig,  SqlDbService svc) {
         ServerConfig config = new ServerConfig();
@@ -60,8 +58,8 @@ public class EbeanConfigAdaptor {
         Set<Class> modelClasses = svc.entityClasses();
         if (null != modelClasses && !modelClasses.isEmpty()) {
             for (Class modelClass : modelClasses) {
-                if (LOGGER.isTraceEnabled()) {
-                    LOGGER.trace(S.concat("add model class into Ebean config: ", modelClass.getName()));
+                if (isTraceEnabled()) {
+                    trace(S.concat("add model class into Ebean config: ", modelClass.getName()));
                 }
                 config.addClass(modelClass);
             }
@@ -71,10 +69,11 @@ public class EbeanConfigAdaptor {
         return config;
     }
 
-
     public DataSourceConfig adaptFrom(act.db.sql.DataSourceConfig actConfig, SqlDbService svc) {
         Properties properties = new Properties();
         properties.putAll(actConfig.customProperties);
+        properties.put("isolationLevel", adaptIsolationLevel(actConfig.isolationLevel));
+
         DataSourceConfig config = new DataSourceConfig();
         config.loadSettings(properties, svc.id());
 
@@ -83,29 +82,17 @@ public class EbeanConfigAdaptor {
         config.setUsername(actConfig.username);
         config.setPassword(actConfig.password);
         config.setAutoCommit(actConfig.autoCommit);
+        config.setIsolationLevel(actConfig.isolationLevel);
 
         config.setMinConnections(actConfig.minConnections);
         config.setMaxConnections(actConfig.maxConnections);
-        config.setHeartbeatSql(actConfig.heartbeatSql);
-        config.setIsolationLevel(actConfig.isolationLevel);
-        config.setMaxAgeMinutes(actConfig.maxAgeMinutes);
-        config.setMaxInactiveTimeSecs(actConfig.maxInactiveTimeSecs);
-        config.setHeartbeatFreqSecs(actConfig.heartbeatFreqSecs);
-        config.setCstmtCacheSize(actConfig.cstmtCacheSize);
-        config.setPstmtCacheSize(actConfig.pstmtCacheSize);
-        config.setTrimPoolFreqSecs(actConfig.trimPoolFreqSecs);
-        config.setWaitTimeoutMillis(actConfig.waitTimeoutMillis);
-        config.setLeakTimeMinutes(actConfig.leakTimeMinutes);
-        config.setPoolListener(actConfig.poolListener);
-        config.setOffline(actConfig.offline);
-        config.setCaptureStackTrace(actConfig.captureStackTrace);
 
         return config;
     }
 
     private NamingConvention namingConvention(SqlDbServiceConfig svcConfig) {
         if (!svcConfig.rawConf.containsKey("naming.convention")) {
-            // https://github.com/actframework/act-ebean/issues/13
+            // https://github.com/actframework/act-ebean2/issues/1
             return new UnderscoreNamingConvention();
         }
         //TODO provide more actuate naming convention matching logic
@@ -115,4 +102,16 @@ public class EbeanConfigAdaptor {
         return new UnderscoreNamingConvention();
     }
 
+    private String adaptIsolationLevel(int level) {
+        switch (level) {
+            case Connection.TRANSACTION_NONE : return "NONE";
+            case Connection.TRANSACTION_READ_COMMITTED : return "READ_COMMITTED";
+            case Connection.TRANSACTION_READ_UNCOMMITTED : return "READ_UNCOMMITTED";
+            case Connection.TRANSACTION_REPEATABLE_READ : return "REPEATABLE_READ";
+            case Connection.TRANSACTION_SERIALIZABLE : return "SERIALIZABLE";
+            default:
+                warn("Unknown isolationLevel found: %s; will use default level: REPEATABLE_READ");
+                return "REPEATABLE_READ";
+        }
+    }
 }

@@ -62,7 +62,7 @@ public class EbeanDaoInjectionListener extends DaoInjectionListenerBase {
             Act.eventBus().bind(SysEventId.DB_SVC_LOADED, new SysEventListenerBase() {
                 @Override
                 public void on(EventObject eventObject) throws Exception {
-                    dao.ebean(service.ebean());
+                    dao.dbService(service);
                     dao.modelType(resolved._1);
                 }
             });

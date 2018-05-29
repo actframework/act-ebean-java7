@@ -20,7 +20,7 @@
 
   <artifactId>act-ebean-java7</artifactId>
   <packaging>jar</packaging>
-  <version>1.6.3-SNAPSHOT</version>
+  <version>1.7.0-SNAPSHOT</version>
 
   <name>ACT Ebean</name>
   <description>Provides SQL database access through Ebean ORM library (java 7+)</description>
@@ -35,7 +35,7 @@
   <parent>
     <groupId>org.actframework</groupId>
     <artifactId>parent</artifactId>
-    <version>1.8.8-RC5</version>
+    <version>1.8.8-RC8</version>
   </parent>
 
   <properties>
@@ -45,7 +45,7 @@
     <ebean-agent.version>8.1.1</ebean-agent.version>
     <ebean-agent-loader.version>2.1.2</ebean-agent-loader.version>
 
-    <act-sql-common.version>1.3.4</act-sql-common.version>
+    <act-sql-common.version>1.4.0</act-sql-common.version>
 
   </properties>
 

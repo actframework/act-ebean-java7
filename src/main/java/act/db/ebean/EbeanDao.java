@@ -27,6 +27,7 @@ import act.db.DB;
 import act.db.DaoBase;
 import act.db.DbService;
 import act.db.Model;
+import act.db.sql.tx.TxContext;
 import act.inject.param.NoBind;
 import act.util.General;
 import com.avaje.ebean.*;
@@ -53,21 +54,25 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
     private static final Logger logger = L.get(EbeanDao.class);
 
     private volatile EbeanServer ebean;
+    private volatile EbeanServer ebeanReadOnly;
+    private volatile EbeanService dbSvc;
     private volatile DataSource ds;
+    private volatile DataSource dsReadOnly;
     private String tableName;
     private Field idField = null;
     private List<QueryIterator> queryIterators = C.newList();
 
     EbeanDao(EbeanService service) {
         init(modelType());
-        this.ebean(service.ebean());
+        this.dbService(service);
     }
 
     EbeanDao(Class<ID_TYPE> idType, Class<MODEL_TYPE> modelType, EbeanService service) {
         super(idType, modelType);
         init(modelType);
-        this.setEbean(service.ebean());
+        this.dbService(service);
         this.ds = service.dataSource();
+        this.dsReadOnly = service.dataSourceReadOnly();
     }
 
     public EbeanDao(Class<ID_TYPE> id_type, Class<MODEL_TYPE> modelType) {
@@ -79,8 +84,14 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
         init(modelType());
     }
 
-    public void ebean(EbeanServer ebean) {
-        setEbean($.notNull(ebean));
+    public void ebean(EbeanServer ebean, boolean readonly) {
+        setEbean($.requireNotNull(ebean), readonly);
+    }
+
+    public void dbService(EbeanService service) {
+        this.dbSvc = service;
+        this.ebean(service.ebean(true), true);
+        this.ebean(service.ebean(false), false);
     }
 
     public void modelType(Class<?> type) {
@@ -113,7 +124,11 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
         }
     }
 
-    private void setEbean(EbeanServer ebean) {
+    private void setEbean(EbeanServer ebean, boolean readonly) {
+        if (readonly) {
+            this.ebeanReadOnly = ebean;
+            return;
+        }
         this.ebean = ebean;
         this.tableName = ((SpiEbeanServer) ebean).getBeanDescriptor(modelType()).getBaseTable();
     }
@@ -125,20 +140,27 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
         return $.cast(svc);
     }
 
-    public EbeanServer ebean() {
-        if (null != ebean) {
+    private EbeanServer ebean_(boolean defaultReadOnly) {
+        boolean ctxReadOnly = TxContext.readOnly(defaultReadOnly);
+        E.illegalStateIf(!defaultReadOnly && ctxReadOnly, "Cannot do write operation within readonly transaction");
+        return ebean(ctxReadOnly);
+    }
+
+    public EbeanServer ebean(boolean readonly) {
+        dbSvc.beginTxIfRequired(null);
+        if (!readonly && null != ebean) {
             return ebean;
         }
-        synchronized (this) {
-            if (null == ebean) {
-                DB db = modelType().getAnnotation(DB.class);
-                String dbId = null == db ? DbServiceManager.DEFAULT : db.value();
-                EbeanService dbService = getService(dbId, app().dbServiceManager());
-                E.NPE(dbService);
-                setEbean(dbService.ebean());
-            }
+        if (readonly && null != ebeanReadOnly) {
+            return ebeanReadOnly;
         }
-        return ebean;
+        synchronized (this) {
+            DB db = modelType().getAnnotation(DB.class);
+            String dbId = null == db ? DbServiceManager.DEFAULT : db.value();
+            EbeanService dbService = getService(dbId, app().dbServiceManager());
+            dbService(dbService);
+            return readonly ? ebeanReadOnly : ebean;
+        }
     }
 
     public DataSource ds() {
@@ -163,7 +185,17 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
 
     @Override
     public MODEL_TYPE findById(ID_TYPE id) {
-        return ebean().find(modelType(), id);
+        return ebean_(true).find(modelType(), id);
+    }
+
+    @Override
+    public MODEL_TYPE findLatest() {
+        throw E.unsupport();
+    }
+
+    @Override
+    public MODEL_TYPE findLastModified() {
+        throw E.unsupport();
     }
 
     @Override
@@ -196,18 +228,8 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
     }
 
     @Override
-    public MODEL_TYPE findLatest() {
-        throw E.unsupport();
-    }
-
-    @Override
-    public MODEL_TYPE findLastModified() {
-        throw E.unsupport();
-    }
-
-    @Override
     public MODEL_TYPE reload(MODEL_TYPE entity) {
-        ebean().refresh(entity);
+        ebean_(true).refresh(entity);
         return entity;
     }
 
@@ -239,12 +261,12 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
 
     @Override
     public MODEL_TYPE save(MODEL_TYPE entity) {
-        ebean().save(entity);
+        ebean_(false).save(entity);
         return entity;
     }
 
     public MODEL_TYPE save(Transaction tx, MODEL_TYPE entity) {
-        ebean().save(entity, tx);
+        ebean_(false).save(entity, tx);
         return entity;
     }
 
@@ -254,61 +276,50 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
         if (list.isEmpty()) {
             return list;
         }
-        Transaction transaction = ebean().createTransaction(TxIsolation.READ_COMMITED);
-        transaction.setBatchMode(true);
-        transaction.setBatchSize(list.size());
-        try {
-            ebean().saveAll(list);
-            transaction.commit();
-        } catch (RuntimeException e) {
-            transaction.rollback();
-            throw e;
-        } finally {
-            transaction.end();
-        }
+        ebean_(false).saveAll(list);
         return list;
     }
 
     public List<MODEL_TYPE> save(Transaction tx, Iterable<MODEL_TYPE> iterable) {
         List<MODEL_TYPE> list = C.list(iterable);
-        ebean().saveAll(list, tx);
+        ebean_(false).saveAll(list, tx);
         return list;
     }
 
     @Override
     public void save(MODEL_TYPE entity, String fields, Object... values) throws IllegalArgumentException {
-        ebean().update(entity);
+        ebean_(false).update(entity);
     }
 
     public void save(Transaction tx, MODEL_TYPE entity, String fields, Object... values) throws IllegalArgumentException {
-        ebean().update(entity, tx);
+        ebean_(false).update(entity, tx);
     }
 
     @Override
     public void delete(MODEL_TYPE entity) {
-        ebean().delete(entity);
+        ebean_(false).delete(entity);
     }
 
     public void delete(Transaction tx, MODEL_TYPE entity) {
-        ebean().delete(entity, tx);
+        ebean_(false).delete(entity, tx);
     }
 
     @Override
     public void delete(EbeanQuery<MODEL_TYPE> query) {
-        ebean().delete(query.rawQuery(), null);
+        ebean_(false).delete(query.rawQuery(), null);
     }
 
     public void delete(Transaction tx, EbeanQuery<MODEL_TYPE> query) {
-        ebean().delete(query.rawQuery(), tx);
+        ebean_(false).delete(query.rawQuery(), tx);
     }
 
     @Override
     public void deleteById(ID_TYPE id) {
-        ebean().delete(modelType(), id);
+        ebean_(false).delete(modelType(), id);
     }
 
     public void deleteById(Transaction tx, ID_TYPE id) {
-        ebean().delete(modelType(), id, tx);
+        ebean_(false).delete(modelType(), id, tx);
     }
 
     @Override
@@ -332,13 +343,13 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
     @Override
     public void drop() {
         String sql = "DELETE from " + tableName;
-        SqlUpdate sqlUpdate = ebean().createSqlUpdate(sql);
-        ebean().execute(sqlUpdate);
+        SqlUpdate sqlUpdate = ebean_(false).createSqlUpdate(sql);
+        ebean_(false).execute(sqlUpdate);
     }
 
     @Override
     public EbeanQuery<MODEL_TYPE> q() {
-        return new EbeanQuery<MODEL_TYPE>(this, modelType());
+        return new EbeanQuery<>(this, modelType());
     }
 
     @Override

@@ -548,7 +548,21 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
                 where.eq(sa[0], val);
                 break;
             case 2:
-                R1.valueOf(sa[1]).applyTo(where, sa[0], val);
+                String op = sa[1];
+                if ("!=".equalsIgnoreCase(op)) {
+                    op = "ne";
+                } else if ("==".equalsIgnoreCase(op)) {
+                    op = "eq";
+                } else if (">".equalsIgnoreCase(op)) {
+                    op = "gt";
+                } else if (">=".equals(op)) {
+                    op = "ge";
+                } else if ("<".equals(op)) {
+                    op = "lt";
+                } else if ("<=".equals(op)) {
+                    op = "le";
+                }
+                R1.valueOf(op).applyTo(where, sa[0], val);
                 break;
             case 3:
                 R2.valueOf(sa[2]).applyTo(where, sa[0], sa[1], val);

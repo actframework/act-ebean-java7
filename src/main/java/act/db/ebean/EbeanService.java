@@ -105,6 +105,8 @@ public final class EbeanService extends SqlDbService {
         }
         app().eventBus().trigger(new EbeanConfigLoaded(ebeanConfig));
         if (readonly) {
+            ebeanConfig.setDdlGenerate(false);
+            ebeanConfig.setDdlRun(false);
             ebeanReadOnly = EbeanServerFactory.create(ebeanConfig);
         } else {
             ebean = EbeanServerFactory.create(ebeanConfig);

@@ -54,6 +54,7 @@ public class EbeanConfigAdaptor extends LogSupport {
         config.setDdlCreateOnly(!actConfig.ddlGeneratorConfig.drop);
 
         config.setNamingConvention(namingConvention(actConfig));
+        config.setDatabasePlatformName(dsConfig.customProperties.get("databasePlatformName"));
 
         Set<Class> modelClasses = svc.entityClasses();
         if (null != modelClasses && !modelClasses.isEmpty()) {

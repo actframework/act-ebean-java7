@@ -198,7 +198,8 @@ public class EbeanQuery<MODEL_TYPE> implements Query<MODEL_TYPE>, Dao.Query<MODE
 
     @Override
     public MODEL_TYPE first() {
-        return qReadOnly.findUnique();
+        List<MODEL_TYPE> list = qReadOnly.setMaxRows(1).findList();
+        return list.isEmpty() ? null : list.get(0);
     }
 
     @Override

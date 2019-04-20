@@ -1,5 +1,8 @@
 # act-ebean-java7 CHANGE LOG
 
+1.7.6 - 20/Apr/2019
+* Update to act-1.8.20
+
 1.7.5 - 20/Nov/2018
 * Catch up Ebean2 fix on GH28
 * update act to 1.8.12

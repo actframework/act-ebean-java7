@@ -1,5 +1,9 @@
 # act-ebean-java7 CHANGE LOG
 
+1.7.8 - 03/Jul/2019
+* update to act-1.8.25
+* update to act-sql-common-1.5.0
+
 1.7.7 - 16/Jun/2019
 * update to act-1.8.23
 * update to act-sql-common-1.4.6

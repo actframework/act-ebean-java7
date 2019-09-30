@@ -103,7 +103,9 @@ public class EbeanAgentLoader extends AgentLoader {
                 }
             } finally {
                 // ensure ebean2 EnhanceContext logout set to dump output
-                Act.jobManager().on(SysEventId.CLASS_LOADER_INITIALIZED, new Runnable() {
+                Act.jobManager().on(SysEventId.CLASS_LOADER_INITIALIZED,
+                        S.buffer("EbeanAgentLoader - clean up for ").append(jarFilePath).toString(),
+                        new Runnable() {
                     @Override
                     public void run() {
                         System.setOut(ps);

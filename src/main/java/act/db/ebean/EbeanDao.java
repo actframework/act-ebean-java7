@@ -583,4 +583,9 @@ public class EbeanDao<ID_TYPE, MODEL_TYPE> extends DaoBase<ID_TYPE, MODEL_TYPE, 
     public EbeanQuery<MODEL_TYPE> createQuery(String s, Object... objects) {
         return q(s, objects);
     }
+
+    @Override
+    public Object processLikeValue(String v) {
+        return v.contains("%") ? v : "%" + v + "%";
+    }
 }

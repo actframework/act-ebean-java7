@@ -1,9 +1,12 @@
 # act-ebean-java7 CHANGE LOG
 
+1.8.0
+* update to act-1.8.29
+* update EbeanDao - add `processLikeValue` method
+
 1.7.9 - 30/Sep/2019
 * update to act-1.8.28
 * update to act-sql-common-1.5.1
-
 
 1.7.8 - 03/Jul/2019
 * update to act-1.8.25

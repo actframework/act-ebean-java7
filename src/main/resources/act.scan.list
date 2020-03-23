@@ -1,2 +1,2 @@
 act.db.ebean.EbeanModule
-act.db.jpa.EntityFinder
+act.db.ebean.IdGeneratorRegister

@@ -105,7 +105,9 @@ public final class EbeanService extends SqlDbService {
         }
         IdGeneratorRegister rg = Act.getInstance(IdGeneratorRegister.class);
         rg.registerTo(ebeanConfig);
-        app().eventBus().trigger(new EbeanConfigLoaded(ebeanConfig));
+        EbeanConfiguratorManager configuratorManager = Act.getInstance(EbeanConfiguratorManager.class);
+        configuratorManager.callConfigurators(ebeanConfig);
+        //app().eventBus().trigger(new EbeanConfigLoaded(ebeanConfig));
         if (readonly) {
             ebeanConfig.setDdlGenerate(false);
             ebeanConfig.setDdlRun(false);

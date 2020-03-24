@@ -1,2 +1,3 @@
 act.db.ebean.EbeanModule
 act.db.ebean.IdGeneratorRegister
+act.db.ebean.EbeanConfiguratorManager
